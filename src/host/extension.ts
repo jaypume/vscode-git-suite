@@ -75,7 +75,7 @@ async function maybeShowSupportNotification(globalState: vscode.Memento): Promis
   } else if (picked === 'Leave a Star') {
     await vscode.env.openExternal(vscode.Uri.parse('https://github.com/jaypume/vscode-git-suite'));
   } else if (picked === 'Donate') {
-    await vscode.env.openExternal(vscode.Uri.parse('https://buymeacoffee.com/rionoir'));
+    await vscode.env.openExternal(vscode.Uri.parse('https://www.buymeacoffee.com/pujiex'));
   }
 }
 
