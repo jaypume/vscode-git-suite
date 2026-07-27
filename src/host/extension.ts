@@ -4,6 +4,7 @@ import { CommitPanelProvider } from './panels/CommitPanelProvider';
 import { GitLogPanelProvider } from './panels/GitLogPanelProvider';
 import { MergeEditorProvider } from './panels/MergeEditorProvider';
 import { UndockedPanelProvider } from './panels/UndockedPanelProvider';
+import { registerLogTreeViews } from './panels/log/registerLogTreeViews';
 import { BranchStatusBar } from './ui/BranchStatusBar';
 import { BadgeController } from './ui/BadgeController';
 import { registerCommands } from './commands/registerCommands';
@@ -220,6 +221,7 @@ export function activate(context: vscode.ExtensionContext): void {
   });
   context.subscriptions.push(badgeDisposable);
   const logPanel = new GitLogPanelProvider(context.extensionUri, manager);
+  context.subscriptions.push(...registerLogTreeViews(manager));
   const mergeEditor = new MergeEditorProvider(context.extensionUri, manager);
   const undockedPanel = new UndockedPanelProvider(context.extensionUri, commitPanel, logPanel);
   commitPanel.setMergeEditorProvider(mergeEditor);

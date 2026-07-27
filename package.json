@@ -49,6 +49,11 @@
           "id": "gitsuite-commit",
           "title": "Git Suite Commit",
           "icon": "media/icons/git-commit.svg"
+        },
+        {
+          "id": "gitsuite-log-sidebar",
+          "title": "Git Suite Branches",
+          "icon": "media/icons/git-branch.svg"
         }
       ],
       "panel": [
@@ -79,10 +84,35 @@
           "id": "gitsuite.gitLog",
           "name": "Git Log",
           "retainContextWhenHidden": true
+        },
+        {
+          "type": "tree",
+          "id": "gitsuite.commitFileTree",
+          "name": "Commit Files",
+          "visibility": "visible"
+        }
+      ],
+      "gitsuite-log-sidebar": [
+        {
+          "type": "tree",
+          "id": "gitsuite.branches",
+          "name": "Branches"
         }
       ]
     },
     "commands": [
+      {
+        "command": "gitsuite.log.openFileDiff",
+        "title": "Open Changes",
+        "category": "Git Suite",
+        "icon": "$(compare-changes)"
+      },
+      {
+        "command": "gitsuite.log.toggleFileViewMode",
+        "title": "Toggle Tree/Flat View",
+        "category": "Git Suite",
+        "icon": "$(list-tree)"
+      },
       {
         "command": "gitsuite.openLog",
         "title": "Focus Git Log",
@@ -264,6 +294,11 @@
     "menus": {
       "view/title": [
         {
+          "command": "gitsuite.log.toggleFileViewMode",
+          "when": "view == gitsuite.commitFileTree",
+          "group": "navigation@1"
+        },
+        {
           "command": "gitsuite.fetchAll",
           "when": "view == gitsuite.commitPanel",
           "group": "navigation@1"
@@ -297,6 +332,13 @@
           "command": "gitsuite.openSettings",
           "when": "view == gitsuite.commitPanel",
           "group": "navigation@7"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "gitsuite.log.openFileDiff",
+          "when": "view == gitsuite.commitFileTree && viewItem == gitsuite.logFile",
+          "group": "navigation@1"
         }
       ],
       "editor/title": [

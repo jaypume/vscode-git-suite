@@ -1,14 +1,10 @@
 import React, { useEffect, useCallback, useRef, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useLogStore } from './store/logStore';
-import { BranchSidebar } from './components/BranchSidebar';
 import { CommitList } from './components/CommitList';
-import { CommitDetail } from './components/CommitDetail';
 import { CommitFiltersBar } from './components/CommitFiltersBar';
 import { assignLanes } from './utils/graphLayout';
 import type { GraphLayout } from './utils/graphLayout';
-import { ResizeHandle } from '../shared/ResizeHandle';
-import { useResize } from '../shared/useResize';
 import { Codicon } from '../shared/Codicon';
 import { getVsCodeApi } from '../shared/vscodeApi';
 import type { LogToHostMsg, HostToLogMsg } from '../../host/types/messages';
@@ -23,10 +19,6 @@ const LOAD_STEP = 150;
 function App() {
   const store = useLogStore();
   const pendingRef = useRef<Map<string, (msg: HostToLogMsg) => void>>(new Map());
-  const { panelRef: sidebarRef, onMouseDown: onSidebarResize } = useResize('right', 220, 120, 400);
-  const { panelRef: detailRef, onMouseDown: onDetailResize } = useResize('left', 380, 200, 600);
-  const [detailCollapsed, setDetailCollapsed] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [themeVersion, setThemeVersion] = useState(0);
 
   useEffect(() => {
@@ -179,27 +171,8 @@ function App() {
   }, [loadMore]);
 
   // When a commit is selected, load its files
-  useEffect(() => {
-    const { selectedCommit } = store;
-    if (!selectedCommit) return;
-    // Stash entries already carry their file list — no network request needed
-    if (selectedCommit.isStash) {
-      store.setCommitFiles(selectedCommit.stashFiles ?? []);
-      return;
-    }
-    store.setLoadingFiles(true);
-    const reqId = generateId();
-    pendingRef.current.set(reqId, (msg) => {
-      if (msg.type === 'LOG_COMMIT_FILES') store.setCommitFiles(msg.files);
-    });
-    getVsCodeApi().postMessage({
-      type: 'LOG_REQUEST_COMMIT_FILES',
-      requestId: reqId,
-      repoId: selectedCommit.repoId,
-      hash: selectedCommit.hash,
-      parents: selectedCommit.parents,
-    } satisfies LogToHostMsg);
-  }, [store.fileLoadSeq]);
+  // Commit-file list is now provided by the native TreeView (host side),
+  // driven by LOG_SELECT_COMMIT. No webview request needed.
 
   const repoColors = useMemo(() => {
     const map: Record<string, string> = {};
@@ -267,10 +240,6 @@ function App() {
     return map;
   }, [store.branches]);
 
-  const selectedRepoColor = store.selectedCommit
-    ? repoColors[store.selectedCommit.repoId]
-    : undefined;
-
   // text/author are debounced inside DebouncedInput; branch/date/repo fire immediately
   const handleFilterChange = useCallback((key: keyof import('./store/logStore').CommitFilters, value: string) => {
     store.setCommitFilters({ [key]: value });
@@ -302,8 +271,6 @@ function App() {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     reloadCommits(cleared);
   }, [reloadCommits]);
-
-  const hasSelectedCommit = !!store.selectedCommit;
 
   const showNoRepo = store.repos.length === 0 && store.initialized;
   const noRepoOverlay = showNoRepo ? (
@@ -347,73 +314,8 @@ function App() {
         onUndock={(target) => send({ type: 'LOG_UNDOCK', target } as LogToHostMsg)}
       />
 
-      {/* Main layout */}
+      {/* Main layout — graph only; branches + commit files moved to native TreeViews */}
       <div style={{ ...mainLayout, visibility: showNoRepo ? 'hidden' : 'visible' }}>
-        {/* Branch sidebar */}
-        {sidebarCollapsed && (
-          <div style={collapsedSidebarStrip}>
-            <button data-top-action-btn="" style={expandSidebarBtn} onClick={() => setSidebarCollapsed(false)} title="Expand sidebar">
-              <Codicon name="layout-sidebar-left-off" style={{ fontSize: '14px' }} />
-            </button>
-          </div>
-        )}
-        <BranchSidebar
-          ref={sidebarRef}
-          repos={store.repos.filter(r => !r.isWorktree)}
-          branches={store.branches}
-          tags={store.tags}
-          filter={store.branchFilter}
-          selectedBranchFilter={store.commitFilters.branch}
-          onFilterChange={store.setBranchFilter}
-          onBranchFilterSelect={useCallback((branchName: string) => {
-            handleFilterChange('branch', branchName);
-          }, [handleFilterChange])}
-          onCheckout={(repoIds, branch) => {
-            repoIds.forEach(repoId => {
-              getVsCodeApi().postMessage({ type: 'LOG_CHECKOUT', requestId: generateId(), repoId, branchName: branch } satisfies LogToHostMsg);
-            });
-          }}
-          onMerge={(repoId, from) => {
-            const reqId = generateId();
-            getVsCodeApi().postMessage({ type: 'LOG_MERGE', requestId: reqId, repoId, from } satisfies LogToHostMsg);
-          }}
-          onRebase={(repoId, onto) => {
-            const reqId = generateId();
-            getVsCodeApi().postMessage({ type: 'LOG_REBASE', requestId: reqId, repoId, onto } satisfies LogToHostMsg);
-          }}
-          onDelete={(repoIds, branchName) => {
-            getVsCodeApi().postMessage({ type: 'LOG_DELETE_BRANCH_MULTI', requestId: generateId(), repoIds, branchName } satisfies LogToHostMsg);
-          }}
-          onFetchRepo={(repoId) => {
-            const reqId = generateId();
-            getVsCodeApi().postMessage({ type: 'LOG_FETCH_REPO', requestId: reqId, repoId } satisfies LogToHostMsg);
-          }}
-          onPull={(repoId) => {
-            const reqId = generateId();
-            getVsCodeApi().postMessage({ type: 'LOG_PULL', requestId: reqId, repoId } satisfies LogToHostMsg);
-          }}
-          onPush={(repoId) => {
-            getVsCodeApi().postMessage({ type: 'LOG_PUSH_PICK', repoId } satisfies LogToHostMsg);
-          }}
-          onCheckoutTag={(repoIds, tagName) => {
-            repoIds.forEach(repoId => {
-              getVsCodeApi().postMessage({ type: 'LOG_CHECKOUT_TAG', requestId: generateId(), repoId, tagName } satisfies LogToHostMsg);
-            });
-          }}
-          onMergeTag={(repoIds, tagName) => {
-            getVsCodeApi().postMessage({ type: 'LOG_MERGE_TAG_MULTI', requestId: generateId(), repoIds, tagName } satisfies LogToHostMsg);
-          }}
-          onPushTag={(repoId, tagName) => {
-            getVsCodeApi().postMessage({ type: 'LOG_PUSH_TAG_PICK', repoId, tagName } satisfies LogToHostMsg);
-          }}
-          onDeleteTag={(repoIds, tagName) => {
-            getVsCodeApi().postMessage({ type: 'LOG_DELETE_TAG_MULTI', requestId: generateId(), repoIds, tagName } satisfies LogToHostMsg);
-          }}
-          onCollapse={() => setSidebarCollapsed(true)}
-          hidden={sidebarCollapsed}
-        />
-        {!sidebarCollapsed && <ResizeHandle onMouseDown={onSidebarResize} />}
-
         {/* Commit list (center) */}
         <CommitList
           layout={graphLayout}
@@ -422,7 +324,13 @@ function App() {
           repos={store.repos}
           currentBranchByRepo={currentBranchByRepo}
           headHashByRepo={headHashByRepo}
-          onSelect={(commit) => { store.selectCommit(commit); setDetailCollapsed(false); }}
+          onSelect={(commit) => {
+            store.selectCommit(commit);
+            // Notify host so the native commit-file tree follows the selection.
+            if (commit) {
+              send({ type: 'LOG_SELECT_COMMIT', repoId: commit.repoId, hash: commit.hash, parents: commit.parents, isStash: commit.isStash, message: commit.message, shortHash: commit.shortHash });
+            }
+          }}
           onLoadMore={handleLoadMore}
           hasMore={store.hasMore}
           storeHasMore={store.hasMore}
@@ -433,27 +341,6 @@ function App() {
           aiEnabled={store.aiEnabled}
           themeVersion={themeVersion}
         />
-
-        {hasSelectedCommit && !detailCollapsed && <ResizeHandle onMouseDown={onDetailResize} />}
-
-        {/* Commit detail (right) — hidden when no commit selected or closed */}
-        {hasSelectedCommit && !detailCollapsed && (
-          <div ref={detailRef} style={detailPane}>
-            <CommitDetail
-              commit={store.selectedCommit}
-              files={store.commitFiles}
-              selectedFile={store.selectedFile}
-              loadingFiles={store.loadingFiles}
-              repoColor={selectedRepoColor}
-              repos={store.repos}
-              iconTheme={store.iconTheme}
-              onSelectFile={store.selectFile}
-              onClose={() => setDetailCollapsed(true)}
-              refColors={graphLayout.refColors}
-              themeVersion={themeVersion}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
@@ -492,44 +379,11 @@ const appStyle: React.CSSProperties = {
 };
 
 
-const collapsedSidebarStrip: React.CSSProperties = {
-  width: '24px',
-  flexShrink: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  paddingTop: '6px',
-  borderRight: '1px solid var(--vscode-panel-border)',
-  background: 'var(--vscode-sideBar-background)',
-};
-
-const expandSidebarBtn: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  padding: '3px',
-  borderRadius: '3px',
-  color: 'var(--vscode-foreground)',
-  opacity: 0.6,
-};
-
 const mainLayout: React.CSSProperties = {
   display: 'flex',
   flex: 1,
   overflow: 'hidden',
   userSelect: 'none',
-};
-
-const detailPane: React.CSSProperties = {
-  width: '380px',
-  flexShrink: 0,
-  overflow: 'hidden',
-  display: 'flex',
-  flexDirection: 'column',
-  userSelect: 'text',
 };
 
 

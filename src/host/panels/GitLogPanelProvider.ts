@@ -9,6 +9,8 @@ import type { CommitPanelProvider } from './CommitPanelProvider';
 import type { UndockedPanelProvider } from './UndockedPanelProvider';
 import { openSquashEditor } from './SquashEditorPanel';
 import { openEditMessageEditor } from './EditMessageEditorPanel';
+import { openSmartDiff } from './log/openSmartDiff';
+import { logUiState } from './log/LogUiState';
 
 function mergeCurrentIntoBranches(branches: BranchInfo[], current: BranchInfo): BranchInfo[] {
   if (!current.detachedTag && !current.detachedHash) return branches; // normal branch — already in list
@@ -378,6 +380,12 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
             }
           }).catch(() => {});
         }
+        break;
+      }
+
+      case 'LOG_SELECT_COMMIT': {
+        // webview selected a commit → update shared UI state (drives native commit-file tree)
+        logUiState.setSelectedCommit(msg);
         break;
       }
 
@@ -1686,87 +1694,4 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
   }
 }
 
-// git empty tree SHA — represents an empty file for added/deleted diffs
-const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
-
-async function openSmartDiff(
-  repo: import('../git/GitService').GitService,
-  msg: { hash: string; filePath: string; fileStatus?: string; oldPath?: string; parents?: string[]; combined?: boolean },
-): Promise<void> {
-  const rootPath = repo.rootPath;
-  const status = msg.fileStatus ?? 'M';
-  const shortHash = msg.hash.slice(0, 8);
-  const fileName = path.basename(msg.filePath);
-
-  const gitUri = (ref: string, filePath: string): vscode.Uri => {
-    const fileUri = vscode.Uri.file(path.join(rootPath, filePath));
-    return vscode.Uri.from({
-      scheme: 'git',
-      path: fileUri.path,
-      query: JSON.stringify({ path: fileUri.fsPath, ref }),
-    });
-  };
-
-  // Resolve parent hash: use provided parents array, fall back to git log
-  const resolveParent = async (index = 0): Promise<string | null> => {
-    const parents = msg.parents?.filter(Boolean) ?? [];
-    if (parents[index]) return parents[index];
-    const list = await repo.getParents(msg.hash);
-    return list[index] ?? null;
-  };
-
-  let leftUri: vscode.Uri;
-  let rightUri: vscode.Uri;
-  let title: string;
-
-  if (status === 'A' || status === 'C') {
-    // File added or copied — left side is empty
-    leftUri  = gitUri(EMPTY_TREE, msg.filePath);
-    rightUri = gitUri(msg.hash, msg.filePath);
-    title    = `${fileName} (added in ${shortHash})`;
-
-  } else if (status === 'D') {
-    // File deleted — right side is empty; find the correct parent
-    const parent = await resolveParent();
-    const parentRef = parent ?? `${msg.hash}~1`;
-    leftUri  = gitUri(parentRef, msg.filePath);
-    rightUri = gitUri(EMPTY_TREE, msg.filePath);
-    title    = `${fileName} (deleted in ${shortHash})`;
-
-  } else if (status === 'R') {
-    // File renamed — diff old path at parent vs new path at commit
-    const oldFilePath = msg.oldPath ?? msg.filePath;
-    const parent = await resolveParent();
-    const parentRef = parent ?? `${msg.hash}~1`;
-    leftUri  = gitUri(parentRef, oldFilePath);
-    rightUri = gitUri(msg.hash, msg.filePath);
-    title    = `${path.basename(oldFilePath)} → ${fileName} (renamed in ${shortHash})`;
-
-  } else {
-    // Modified (M), or combined/merge diff
-    let parentRef: string;
-
-    if (msg.combined) {
-      // Combined diff: find the parent where this file actually changed
-      const differingParent = await repo.findParentWithFileDiff(msg.hash, msg.filePath, msg.parents ?? []);
-      parentRef = differingParent ?? `${msg.hash}~1`;
-    } else {
-      const parent = await resolveParent(0);
-      parentRef = parent ?? `${msg.hash}~1`;
-    }
-
-    // Fallback: if parent doesn't have the file, treat as newly added
-    const parentHasFile = await repo.gitObjectExists(parentRef, msg.filePath);
-    if (!parentHasFile) {
-      leftUri  = gitUri(EMPTY_TREE, msg.filePath);
-      rightUri = gitUri(msg.hash, msg.filePath);
-      title    = `${fileName} (added in ${shortHash})`;
-    } else {
-      leftUri  = gitUri(parentRef, msg.filePath);
-      rightUri = gitUri(msg.hash, msg.filePath);
-      title    = `${fileName} (${shortHash})`;
-    }
-  }
-
-  await vscode.commands.executeCommand('vscode.diff', leftUri, rightUri, title, { preview: true });
-}
+// openSmartDiff moved to ./log/openSmartDiff.ts (shared with the native commit-file tree).
