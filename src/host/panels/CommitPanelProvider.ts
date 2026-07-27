@@ -23,7 +23,6 @@ import type { BranchStatusBar } from '../ui/BranchStatusBar';
 export class CommitPanelProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'gitsuite.commitPanel';
   private view?: vscode.WebviewView;
-  private pendingFocusRepo: string | null = null;
   private logProvider?: GitLogPanelProvider;
   private undockedPanel?: UndockedPanelProvider;
   private branchStatusBar?: BranchStatusBar;
@@ -187,16 +186,6 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       loadIconTheme(webviewView.webview).then(iconTheme => {
         this.post({ type: 'COMMIT_STATUS_UPDATE', repos: this.manager.getRepoMetas(), status, iconTheme, fileViewMode: this.getFileViewMode() });
       }).catch(() => { /* icon theme optional */ });
-
-      // Replay a pending repo focus once the view is ready and data is loaded.
-      if (this.pendingFocusRepo) {
-        const id = this.pendingFocusRepo;
-        this.pendingFocusRepo = null;
-        setTimeout(() => {
-          this.post({ type: 'COMMIT_SWITCH_TAB', tab: 'push' });
-          this.post({ type: 'COMMIT_FOCUS_REPO', repoId: id });
-        }, 200);
-      }
     });
 
     // Re-send icon theme when the user changes icon or color theme
@@ -293,7 +282,6 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
 
   /** Switch the commit panel to the Push tab and scroll to a repo's section. */
   focusRepo(repoId: string): void {
-    this.pendingFocusRepo = repoId;
     // Make sure the panel is shown (triggers resolve if never opened).
     vscode.commands.executeCommand('gitsuite.commitPanel.focus');
     this.switchToTab('push');
