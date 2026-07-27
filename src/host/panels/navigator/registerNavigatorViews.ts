@@ -1,19 +1,21 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import type { WorkspaceGitManager } from '../../git/WorkspaceGitManager';
+import type { GitLogPanelProvider } from '../GitLogPanelProvider';
 import { NavigatorTreeProvider, type NavGroupBy, type NavNode } from './NavigatorTreeProvider';
 
 const GROUP_BY_KEY = 'gitsuite.nav.groupBy';
+const ACTIVE_REPO_KEY = 'gitsuite.nav.activeRepo';
 
 /**
  * Register the unified Git Navigator view: grouping switch + stash/worktree
- * actions (node-signature) + inline hover buttons (added here too).
- * Branch/tag actions are added in this file as well.
+ * actions (node-signature) + inline hover buttons + repo activation (sync Git Log).
  */
-export function registerNavigatorViews(manager: WorkspaceGitManager): vscode.Disposable[] {
+export function registerNavigatorViews(manager: WorkspaceGitManager, logPanel: GitLogPanelProvider): vscode.Disposable[] {
   const disposables: vscode.Disposable[] = [];
   const provider = new NavigatorTreeProvider(manager);
-  disposables.push(vscode.window.registerTreeDataProvider('gitsuite.navigator', provider));
+  const treeView = vscode.window.createTreeView('gitsuite.navigator', { treeDataProvider: provider, showCollapseAll: true });
+  disposables.push(treeView);
 
   const refreshAfter = async (): Promise<void> => {
     await manager.getAllStatusesFresh();
@@ -26,7 +28,26 @@ export function registerNavigatorViews(manager: WorkspaceGitManager): vscode.Dis
   };
   vscode.commands.executeCommand('setContext', GROUP_BY_KEY, provider.currentGroupBy);
 
+  // Activate a repo: single-select (unblocks others), syncs Git Log to it.
+  const activateRepo = (repoId: string | null) => {
+    provider.setActiveRepo(repoId);
+    vscode.commands.executeCommand('setContext', ACTIVE_REPO_KEY, repoId);
+    if (repoId) {
+      logPanel.focusRepo(repoId);
+      // reveal the activated repo node so its content shows
+      const node = provider.repoNode(repoId);
+      if (node) treeView.reveal(node, { expand: true, select: false }).then(undefined, () => {});
+    }
+  };
+
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.refresh', () => provider.refresh()));
+  disposables.push(vscode.commands.registerCommand('gitsuite.nav.repo.activate', (node: NavNode) => {
+    if (node.kind !== 'repo') return;
+    activateRepo(node.meta.id);
+  }));
+  disposables.push(vscode.commands.registerCommand('gitsuite.nav.repo.deactivate', () => {
+    activateRepo(null);
+  }));
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.filterRepos', async () => {
     const metas = provider.allMetas;
     if (metas.length === 0) return;

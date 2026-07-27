@@ -131,6 +131,18 @@
         "icon": "$(filter)"
       },
       {
+        "command": "gitsuite.nav.repo.activate",
+        "title": "Activate Repository",
+        "category": "Git Suite",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "gitsuite.nav.repo.deactivate",
+        "title": "Deactivate Repository",
+        "category": "Git Suite",
+        "icon": "$(eye-closed)"
+      },
+      {
         "command": "gitsuite.nav.groupByByRepo",
         "title": "By Repository",
         "category": "Git Suite"
@@ -537,6 +549,16 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "gitsuite.nav.repo.activate",
+          "when": "view == gitsuite.navigator && viewItem == gitsuite.nav.repo",
+          "group": "inline@1"
+        },
+        {
+          "command": "gitsuite.nav.repo.deactivate",
+          "when": "view == gitsuite.navigator && viewItem == gitsuite.nav.repo.active",
+          "group": "inline@1"
+        },
         {
           "command": "gitsuite.nav.branch.checkout",
           "when": "view == gitsuite.navigator && viewItem =~ /^gitsuite\\.nav\\.branch\\.(local|remote)$/",

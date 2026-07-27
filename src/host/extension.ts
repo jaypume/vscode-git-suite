@@ -209,7 +209,6 @@ export function activate(context: vscode.ExtensionContext): void {
   profileService.autoInitIfEmpty();
 
   const commitPanel = new CommitPanelProvider(context.extensionUri, manager, context.globalStorageUri.fsPath, shelveDocProvider, undefined, profileService, context.globalState, context.workspaceState);
-  context.subscriptions.push(...registerNavigatorViews(manager));
 
   let startupNotificationsDone = false;
   const badgeDisposable = manager.onStatusChange(status => { badge.update(status); });
@@ -224,6 +223,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(badgeDisposable);
   const logPanel = new GitLogPanelProvider(context.extensionUri, manager);
   context.subscriptions.push(...registerLogTreeViews(manager));
+  context.subscriptions.push(...registerNavigatorViews(manager, logPanel));
   const mergeEditor = new MergeEditorProvider(context.extensionUri, manager);
   const undockedPanel = new UndockedPanelProvider(context.extensionUri, commitPanel, logPanel);
   commitPanel.setMergeEditorProvider(mergeEditor);

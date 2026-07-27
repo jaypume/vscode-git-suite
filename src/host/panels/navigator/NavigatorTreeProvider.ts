@@ -51,6 +51,21 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
   get currentGroupBy(): NavGroupBy { return this.groupBy; }
   get allMetas(): RepoMeta[] { return this.metas; }
   get activeFilter(): Set<string> | null { return this.filteredRepoIds; }
+  get activeRepoId(): string | null { return this.activeRepo; }
+
+  /** Single active repo (drives Git Log sync). null = none active. */
+  private activeRepo: string | null = null;
+
+  setActiveRepo(id: string | null): void {
+    this.activeRepo = id;
+    this.refresh();
+  }
+
+  /** Look up the repo NavNode by id (for reveal). */
+  repoNode(repoId: string): NavNode | undefined {
+    const meta = this.metas.find(m => m.id === repoId);
+    return meta ? { kind: 'repo', meta } : undefined;
+  }
 
   /** Restrict visible repos to the given ids (null/empty = show all). */
   setFilteredRepoIds(ids: string[] | null): void {
@@ -224,9 +239,14 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
   getTreeItem(node: NavNode): vscode.TreeItem {
     switch (node.kind) {
       case 'repo': {
-        const item = new vscode.TreeItem(node.meta.name, vscode.TreeItemCollapsibleState.Expanded);
-        item.iconPath = new vscode.ThemeIcon('repo');
-        item.contextValue = 'gitsuite.nav.repo';
+        const isActive = this.activeRepo === node.meta.id;
+        const item = new vscode.TreeItem(
+          node.meta.name,
+          isActive ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed,
+        );
+        item.iconPath = new vscode.ThemeIcon(isActive ? 'repo' : 'repo', isActive ? new vscode.ThemeColor('charts.blue') : undefined);
+        item.description = isActive ? 'active' : '';
+        item.contextValue = isActive ? 'gitsuite.nav.repo.active' : 'gitsuite.nav.repo';
         return item;
       }
       case 'group':
