@@ -281,6 +281,16 @@
         "icon": "$(clear-all)"
       },
       {
+        "command": "gitsuite.worktree.add",
+        "title": "Add Worktree",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.prune",
+        "title": "Prune All Worktrees",
+        "category": "Git Suite"
+      },
+      {
         "command": "gitsuite.openLog",
         "title": "Focus Git Log",
         "category": "Git Suite",
