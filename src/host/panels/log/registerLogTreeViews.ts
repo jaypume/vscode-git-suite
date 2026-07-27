@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import type { WorkspaceGitManager } from '../../git/WorkspaceGitManager';
 import { CommitFileTreeProvider } from './CommitFileTreeProvider';
-import { BranchTreeProvider } from './BranchTreeProvider';
 import { logUiState, type FileViewMode } from './LogUiState';
 import { openSmartDiff } from './openSmartDiff';
 
@@ -13,10 +12,6 @@ export function registerLogTreeViews(manager: WorkspaceGitManager): vscode.Dispo
 
   const fileTreeProvider = new CommitFileTreeProvider(manager);
   disposables.push(vscode.window.registerTreeDataProvider('gitsuite.commitFileTree', fileTreeProvider));
-
-  const branchTreeProvider = new BranchTreeProvider(manager);
-  disposables.push(vscode.window.registerTreeDataProvider('gitsuite.branches', branchTreeProvider));
-  disposables.push(vscode.commands.registerCommand('gitsuite.branches.refresh', () => branchTreeProvider.refresh()));
 
   // Open diff for a file in the selected commit (reuses webview's openSmartDiff).
   disposables.push(vscode.commands.registerCommand('gitsuite.log.openFileDiff', async (
