@@ -27,6 +27,19 @@ export function registerNavigatorViews(manager: WorkspaceGitManager): vscode.Dis
   vscode.commands.executeCommand('setContext', GROUP_BY_KEY, provider.currentGroupBy);
 
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.refresh', () => provider.refresh()));
+  disposables.push(vscode.commands.registerCommand('gitsuite.nav.filterRepos', async () => {
+    const metas = provider.allMetas;
+    if (metas.length === 0) return;
+    const active = provider.activeFilter;
+    const items = metas.map(m => ({ label: m.name, id: m.id, picked: active ? active.has(m.id) : true }));
+    const picks = await vscode.window.showQuickPick(items, {
+      title: 'Filter Repositories',
+      placeHolder: 'Select repositories to show',
+      canPickMany: true,
+    });
+    if (picks === undefined) return; // cancelled
+    provider.setFilteredRepoIds(picks.map(p => p.id));
+  }));
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.groupByByRepo', () => applyGroupBy('byRepo')));
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.groupByByType', () => applyGroupBy('byType')));
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.groupByFlat', () => applyGroupBy('flat')));

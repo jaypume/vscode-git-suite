@@ -41,6 +41,7 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
   readonly onDidChangeTreeData = this._onDidChange.event;
 
   private groupBy: NavGroupBy = 'byRepo';
+  private filteredRepoIds: Set<string> | null = null; // null = no filter (all repos)
   private branches: BranchInfo[] = [];
   private tags: TagInfo[] = [];
   private stashesByRepo = new Map<string, StashEntry[]>();
@@ -48,6 +49,20 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
   private metas: RepoMeta[] = [];
 
   get currentGroupBy(): NavGroupBy { return this.groupBy; }
+  get allMetas(): RepoMeta[] { return this.metas; }
+  get activeFilter(): Set<string> | null { return this.filteredRepoIds; }
+
+  /** Restrict visible repos to the given ids (null/empty = show all). */
+  setFilteredRepoIds(ids: string[] | null): void {
+    if (!ids || ids.length === 0) this.filteredRepoIds = null;
+    else this.filteredRepoIds = new Set(ids);
+    this.refresh();
+  }
+
+  private visibleMetas(): RepoMeta[] {
+    if (!this.filteredRepoIds) return this.metas;
+    return this.metas.filter(m => this.filteredRepoIds!.has(m.id));
+  }
 
   setGroupBy(g: NavGroupBy): void {
     if (this.groupBy === g) return;
@@ -109,18 +124,18 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
   /** Flat (cross-repo) branch nodes — no merging, each carries its repoId. */
   private flatBranches(): NavNode[] {
     return this.branches
-      .filter(b => !b.detachedTag && !b.detachedHash)
+      .filter(b => !b.detachedTag && !b.detachedHash && this.isVisibleRepo(b.repoId))
       .sort((a, b) => baseName(a).localeCompare(baseName(b)))
       .map(b => ({ kind: 'branch', repoId: b.repoId, branch: b }));
   }
 
   private flatTags(): NavNode[] {
-    return this.tags.slice().sort((a, b) => a.name.localeCompare(b.name)).map(t => ({ kind: 'tag', repoId: t.repoId, name: t.name }));
+    return this.tags.filter(t => this.isVisibleRepo(t.repoId)).slice().sort((a, b) => a.name.localeCompare(b.name)).map(t => ({ kind: 'tag', repoId: t.repoId, name: t.name }));
   }
 
   private flatStashes(): NavNode[] {
     const out: NavNode[] = [];
-    for (const m of this.metas) {
+    for (const m of this.visibleMetas()) {
       const repo = this.manager.getRepo(m.id);
       const root = repo?.rootPath ?? '';
       for (const s of (this.stashesByRepo.get(m.id) ?? [])) out.push({ kind: 'stash', repoId: m.id, repoRoot: root, stash: s });
@@ -130,7 +145,7 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
 
   private flatWorktrees(): NavNode[] {
     const out: NavNode[] = [];
-    for (const m of this.metas) {
+    for (const m of this.visibleMetas()) {
       for (const w of (this.worktreesByRepo.get(m.id) ?? [])) {
         if (!w.isMain) out.push({ kind: 'worktree', repoId: m.id, wt: w });
       }
@@ -138,16 +153,21 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
     return out;
   }
 
+  private isVisibleRepo(repoId: string): boolean {
+    return !this.filteredRepoIds || this.filteredRepoIds.has(repoId);
+  }
+
   getChildren(element?: NavNode): NavNode[] {
     // Root depends on grouping
     if (!element) {
-      if (this.groupBy === 'byRepo') return this.metas.map(m => ({ kind: 'repo', meta: m }));
+      const metas = this.visibleMetas();
+      if (this.groupBy === 'byRepo') return metas.map(m => ({ kind: 'repo', meta: m }));
       if (this.groupBy === 'byType') {
         const groups: NavNode[] = [];
-        if (this.branches.length) groups.push({ kind: 'typeGroup', bucket: 'branches' });
-        if (this.tags.length) groups.push({ kind: 'typeGroup', bucket: 'tags' });
-        if ([...this.stashesByRepo.values()].some(l => l.length)) groups.push({ kind: 'typeGroup', bucket: 'stashes' });
-        if ([...this.worktreesByRepo.values()].some(l => l.some(w => !w.isMain))) groups.push({ kind: 'typeGroup', bucket: 'worktrees' });
+        if (this.branches.some(b => this.isVisibleRepo(b.repoId))) groups.push({ kind: 'typeGroup', bucket: 'branches' });
+        if (this.tags.some(t => this.isVisibleRepo(t.repoId))) groups.push({ kind: 'typeGroup', bucket: 'tags' });
+        if (metas.some(m => (this.stashesByRepo.get(m.id) ?? []).length)) groups.push({ kind: 'typeGroup', bucket: 'stashes' });
+        if (metas.some(m => (this.worktreesByRepo.get(m.id) ?? []).some(w => !w.isMain))) groups.push({ kind: 'typeGroup', bucket: 'worktrees' });
         return groups;
       }
       // flat: all items mixed, bucketed by type
@@ -158,8 +178,8 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
     if (element.kind === 'typeGroup') {
       if (element.bucket === 'branches') return this.flatBranches();
       if (element.bucket === 'tags') return this.flatTags();
-      if (element.bucket === 'stashes') return this.metas.filter(m => (this.stashesByRepo.get(m.id) ?? []).length).map(m => ({ kind: 'repo', meta: m }));
-      if (element.bucket === 'worktrees') return this.metas.filter(m => (this.worktreesByRepo.get(m.id) ?? []).some(w => !w.isMain)).map(m => ({ kind: 'repo', meta: m }));
+      if (element.bucket === 'stashes') return this.visibleMetas().filter(m => (this.stashesByRepo.get(m.id) ?? []).length).map(m => ({ kind: 'repo', meta: m }));
+      if (element.bucket === 'worktrees') return this.visibleMetas().filter(m => (this.worktreesByRepo.get(m.id) ?? []).some(w => !w.isMain)).map(m => ({ kind: 'repo', meta: m }));
     }
 
     // byType: repo under stashes/worktrees typeGroup → its stashes/worktrees (not sub-grouped)

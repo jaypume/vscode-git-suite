@@ -125,6 +125,12 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "gitsuite.nav.filterRepos",
+        "title": "Filter Repositories",
+        "category": "Git Suite",
+        "icon": "$(filter)"
+      },
+      {
         "command": "gitsuite.nav.groupByByRepo",
         "title": "By Repository",
         "category": "Git Suite"
@@ -448,14 +454,19 @@
           "group": "navigation@1"
         },
         {
-          "submenu": "gitsuite.nav.groupBy",
+          "command": "gitsuite.nav.filterRepos",
           "when": "view == gitsuite.navigator",
           "group": "navigation@2"
         },
         {
-          "command": "gitsuite.nav.refresh",
+          "submenu": "gitsuite.nav.groupBy",
           "when": "view == gitsuite.navigator",
           "group": "navigation@3"
+        },
+        {
+          "command": "gitsuite.nav.refresh",
+          "when": "view == gitsuite.navigator",
+          "group": "navigation@4"
         },
         {
           "command": "gitsuite.fetchAll",
