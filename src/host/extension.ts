@@ -6,6 +6,7 @@ import { MergeEditorProvider } from './panels/MergeEditorProvider';
 import { UndockedPanelProvider } from './panels/UndockedPanelProvider';
 import { registerLogTreeViews } from './panels/log/registerLogTreeViews';
 import { registerNavigatorViews } from './panels/navigator/registerNavigatorViews';
+import { registerSCM } from './scm/registerSCM';
 import { BranchStatusBar } from './ui/BranchStatusBar';
 import { BadgeController } from './ui/BadgeController';
 import { registerCommands } from './commands/registerCommands';
@@ -224,6 +225,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const logPanel = new GitLogPanelProvider(context.extensionUri, manager);
   context.subscriptions.push(...registerLogTreeViews(manager));
   context.subscriptions.push(...registerNavigatorViews(manager, logPanel));
+  context.subscriptions.push(...registerSCM(manager));
   const mergeEditor = new MergeEditorProvider(context.extensionUri, manager);
   const undockedPanel = new UndockedPanelProvider(context.extensionUri, commitPanel, logPanel);
   commitPanel.setMergeEditorProvider(mergeEditor);

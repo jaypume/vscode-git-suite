@@ -143,6 +143,72 @@
         "icon": "$(eye-closed)"
       },
       {
+        "command": "gitsuite.scm.commit",
+        "title": "Commit",
+        "category": "Git Suite",
+        "icon": "$(check)"
+      },
+      {
+        "command": "gitsuite.scm.openDiff",
+        "title": "Open Changes",
+        "category": "Git Suite",
+        "icon": "$(compare-changes)"
+      },
+      {
+        "command": "gitsuite.scm.stage",
+        "title": "Stage",
+        "category": "Git Suite",
+        "icon": "$(add)"
+      },
+      {
+        "command": "gitsuite.scm.unstage",
+        "title": "Unstage",
+        "category": "Git Suite",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "gitsuite.scm.discard",
+        "title": "Discard Changes",
+        "category": "Git Suite",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "gitsuite.scm.stageAll",
+        "title": "Stage All",
+        "category": "Git Suite",
+        "icon": "$(add)"
+      },
+      {
+        "command": "gitsuite.scm.unstageAll",
+        "title": "Unstage All",
+        "category": "Git Suite",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "gitsuite.scm.discardAll",
+        "title": "Discard All",
+        "category": "Git Suite",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "gitsuite.scm.commitAmend",
+        "title": "Commit (Amend)",
+        "category": "Git Suite",
+        "icon": "$(history)"
+      },
+      {
+        "command": "gitsuite.scm.commitAndPush",
+        "title": "Commit & Push",
+        "category": "Git Suite",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "gitsuite.scm.aiMessage",
+        "title": "Generate Commit Message (AI)",
+        "category": "Git Suite",
+        "icon": "$(sparkle)"
+      },
+      {
         "command": "gitsuite.nav.groupByByRepo",
         "title": "By Repository",
         "category": "Git Suite"
@@ -704,6 +770,62 @@
           "command": "gitsuite.log.openFileDiff",
           "when": "view == gitsuite.commitFileTree && viewItem == gitsuite.logFile",
           "group": "navigation@1"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "gitsuite.scm.aiMessage",
+          "group": "navigation",
+          "when": "scmProvider =~ /^gitsuite-/"
+        },
+        {
+          "command": "gitsuite.scm.commitAndPush",
+          "group": "navigation",
+          "when": "scmProvider =~ /^gitsuite-/"
+        },
+        {
+          "command": "gitsuite.scm.commitAmend",
+          "group": "1_commit",
+          "when": "scmProvider =~ /^gitsuite-/"
+        }
+      ],
+      "scm/resourceGroup/context": [
+        {
+          "command": "gitsuite.scm.stageAll",
+          "group": "1_modification",
+          "when": "scmProvider =~ /^gitsuite-/ && scmResourceGroup == changes"
+        },
+        {
+          "command": "gitsuite.scm.unstageAll",
+          "group": "1_modification",
+          "when": "scmProvider =~ /^gitsuite-/ && scmResourceGroup == staged"
+        },
+        {
+          "command": "gitsuite.scm.discardAll",
+          "group": "1_modification",
+          "when": "scmProvider =~ /^gitsuite-/ && scmResourceGroup == changes"
+        }
+      ],
+      "scm/resourceState/context": [
+        {
+          "command": "gitsuite.scm.stage",
+          "group": "1_modification",
+          "when": "scmProvider =~ /^gitsuite-/ && scmResourceGroup == changes"
+        },
+        {
+          "command": "gitsuite.scm.unstage",
+          "group": "1_modification",
+          "when": "scmProvider =~ /^gitsuite-/ && scmResourceGroup == staged"
+        },
+        {
+          "command": "gitsuite.scm.discard",
+          "group": "1_modification",
+          "when": "scmProvider =~ /^gitsuite-/ && scmResourceGroup == changes"
+        },
+        {
+          "command": "gitsuite.scm.openDiff",
+          "group": "navigation",
+          "when": "scmProvider =~ /^gitsuite-/"
         }
       ],
       "editor/title": [
