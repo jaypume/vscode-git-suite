@@ -372,6 +372,4 @@ For new features, open an issue describing:
 
 ## 📄 License
 
-This project is distributed under the GNU General Public License v3.0.
-
-Git Suite is a derivative work based on [GitCharm](https://github.com/RioNoir/GitCharm) by RioNoir. Modifications and new features are maintained by [jaypume](https://github.com/jaypume).
+This project is distributed under the GNU General Public License v3.0. See [NOTICE](NOTICE) for attribution details.
