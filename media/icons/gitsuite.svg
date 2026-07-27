@@ -1,55 +1,78 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <defs>
-    <!-- Deep purple-black squircle background -->
+    <!-- Brighter purple squircle background -->
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1a1033"/>
-      <stop offset="0.55" stop-color="#0f0a1e"/>
-      <stop offset="1" stop-color="#2d1b4e"/>
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="0.5" stop-color="#6d28d9"/>
+      <stop offset="1" stop-color="#4c1d95"/>
     </linearGradient>
-    <!-- Brand purple highlight -->
+    <!-- Top glass highlight -->
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Branch stroke: light lavender → bright violet -->
     <linearGradient id="branch" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#c4b5fd"/>
-      <stop offset="1" stop-color="#7c3aed"/>
+      <stop offset="0" stop-color="#f5f3ff"/>
+      <stop offset="1" stop-color="#ddd6fe"/>
     </linearGradient>
+    <!-- Suite stack cards -->
     <linearGradient id="stack" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#a855f7"/>
-      <stop offset="1" stop-color="#6d28d9"/>
+      <stop offset="0" stop-color="#c4b5fd"/>
+      <stop offset="1" stop-color="#a78bfa"/>
     </linearGradient>
+    <!-- Node bevel highlight -->
+    <radialGradient id="nodeHi" cx="0.35" cy="0.3" r="0.7">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
     <!-- Squircle clip -->
     <clipPath id="squircle">
       <path d="M128 16c-48 0-72 6-90 24S14 82 14 128s6 72 24 90 42 24 90 24 72-6 90-24 24-42 24-90-6-72-24-90-42-24-90-24z"/>
     </clipPath>
+    <!-- Drop shadow for depth -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
   <!-- Background squircle -->
   <g clip-path="url(#squircle)">
     <rect width="256" height="256" fill="url(#bg)"/>
-    <!-- Subtle top glow -->
-    <ellipse cx="128" cy="40" rx="110" ry="60" fill="#7c3aed" opacity="0.18"/>
+    <!-- Top glossy highlight -->
+    <ellipse cx="128" cy="80" rx="120" ry="90" fill="url(#glow)"/>
   </g>
 
-  <!-- Suite stack (layered cards) — bottom, behind branch -->
-  <g opacity="0.55">
+  <!-- Thin inner border for crisp edge -->
+  <path d="M128 16c-48 0-72 6-90 24S14 82 14 128s6 72 24 90 42 24 90 24 72-6 90-24 24-42 24-90-6-72-24-90-42-24-90-24z"
+        fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2"/>
+
+  <!-- Suite stack (layered cards) -->
+  <g filter="url(#softShadow)">
+    <rect x="58" y="178" width="140" height="20" rx="6" fill="url(#stack)" opacity="0.55"/>
     <rect x="58" y="150" width="140" height="20" rx="6" fill="url(#stack)"/>
-    <rect x="58" y="178" width="140" height="20" rx="6" fill="url(#stack)" opacity="0.6"/>
   </g>
 
-  <!-- Git branch: Y-shape with 3 nodes -->
-  <g fill="none" stroke="url(#branch)" stroke-width="11" stroke-linecap="round">
-    <!-- vertical stem -->
+  <!-- Git branch: Y-shape -->
+  <g fill="none" stroke="url(#branch)" stroke-width="12" stroke-linecap="round" filter="url(#softShadow)">
     <line x1="128" y1="98" x2="128" y2="158"/>
-    <!-- curved branch to right node -->
     <path d="M128 98 Q128 70 168 70"/>
   </g>
 
-  <!-- Nodes -->
-  <!-- top node (brand purple) -->
-  <circle cx="128" cy="98" r="15" fill="#a855f7"/>
-  <circle cx="128" cy="98" r="6" fill="#1a1033"/>
-  <!-- right node (brand purple) -->
-  <circle cx="172" cy="70" r="15" fill="#a855f7"/>
-  <circle cx="172" cy="70" r="6" fill="#1a1033"/>
-  <!-- bottom node — Git orange accent (commit HEAD) -->
-  <circle cx="128" cy="158" r="17" fill="#fc6d26"/>
-  <circle cx="128" cy="158" r="6.5" fill="#1a1033"/>
+  <!-- Nodes with bevel -->
+  <g filter="url(#softShadow)">
+    <!-- top node -->
+    <circle cx="128" cy="98" r="16" fill="#f5f3ff"/>
+    <circle cx="128" cy="98" r="16" fill="url(#nodeHi)"/>
+    <!-- right node -->
+    <circle cx="172" cy="70" r="16" fill="#f5f3ff"/>
+    <circle cx="172" cy="70" r="16" fill="url(#nodeHi)"/>
+    <!-- bottom node — Git orange accent (HEAD) -->
+    <circle cx="128" cy="158" r="18" fill="#fc6d26"/>
+    <circle cx="128" cy="158" r="18" fill="url(#nodeHi)"/>
+  </g>
 </svg>

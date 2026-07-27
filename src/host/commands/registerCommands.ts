@@ -144,7 +144,7 @@ export function registerCommands(
     }),
 
     vscode.commands.registerCommand('gitsuite.openSettings', () => {
-      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:jaypume.gitsuite');
+      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:pujie.gitsuite');
     }),
 
     vscode.commands.registerCommand('gitsuite.resetViewLocations', async () => {
@@ -269,7 +269,7 @@ export function registerCommands(
       if (!pickedProvider) return;
 
       if (pickedProvider.providerId === OPEN_SETTINGS_ID) {
-        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:jaypume.gitsuite gitsuite.ai');
+        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:pujie.gitsuite gitsuite.ai');
         return;
       }
 
