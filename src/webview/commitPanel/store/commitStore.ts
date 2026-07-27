@@ -71,7 +71,7 @@ function allFilePaths(repoStatus: RepoStatus): string[] {
 
 function loadPersistedSelection(mode: 'simplified' | 'changelists', repoId: string): Set<string> | null {
   try {
-    const raw = localStorage.getItem(`gitcharm:${mode}:selection:${repoId}`);
+    const raw = localStorage.getItem(`gitsuite:${mode}:selection:${repoId}`);
     if (!raw) return null;
     return new Set(JSON.parse(raw) as string[]);
   } catch { return null; }
@@ -79,7 +79,7 @@ function loadPersistedSelection(mode: 'simplified' | 'changelists', repoId: stri
 
 function savePersistedSelection(mode: 'simplified' | 'changelists', repoId: string, paths: Set<string>) {
   try {
-    localStorage.setItem(`gitcharm:${mode}:selection:${repoId}`, JSON.stringify(Array.from(paths)));
+    localStorage.setItem(`gitsuite:${mode}:selection:${repoId}`, JSON.stringify(Array.from(paths)));
   } catch { /* ignore */ }
 }
 

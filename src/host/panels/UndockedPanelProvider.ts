@@ -15,7 +15,7 @@ function isLogMsg(msg: UndockedToHostMsg): msg is LogToHostMsg {
 }
 
 export class UndockedPanelProvider implements vscode.Disposable {
-  public static readonly viewType = 'gitcharm.undocked';
+  public static readonly viewType = 'gitsuite.undocked';
 
   private panel: vscode.WebviewPanel | null = null;
   private disposables: vscode.Disposable[] = [];
@@ -38,7 +38,7 @@ export class UndockedPanelProvider implements vscode.Disposable {
           this.panel.webview,
           this.extensionUri,
           'undockedPanel',
-          'GitCharm',
+          'Git Suite',
           { showCommit },
         );
       }
@@ -53,7 +53,7 @@ export class UndockedPanelProvider implements vscode.Disposable {
 
     this.panel = vscode.window.createWebviewPanel(
       UndockedPanelProvider.viewType,
-      'GitCharm',
+      'Git Suite',
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -75,7 +75,7 @@ export class UndockedPanelProvider implements vscode.Disposable {
       this.panel.webview,
       this.extensionUri,
       'undockedPanel',
-      'GitCharm',
+      'Git Suite',
       { showCommit },
     );
 

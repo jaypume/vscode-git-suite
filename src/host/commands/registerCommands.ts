@@ -21,39 +21,39 @@ export function registerCommands(
 ): void {
   context.subscriptions.push(
     // Focus the Git Log panel in the bottom bar
-    vscode.commands.registerCommand('gitcharm.openLog', () => {
+    vscode.commands.registerCommand('gitsuite.openLog', () => {
       logPanel.focus();
     }),
 
-    vscode.commands.registerCommand('gitcharm.refreshCommitPanel', () => {
+    vscode.commands.registerCommand('gitsuite.refreshCommitPanel', () => {
       commitPanel.refresh();
     }),
 
-    vscode.commands.registerCommand('gitcharm.openMergeEditor', () => {
+    vscode.commands.registerCommand('gitsuite.openMergeEditor', () => {
       mergeEditor.openCurrentEditorFile();
     }),
 
-    vscode.commands.registerCommand('gitcharm.commit', () => {
-      vscode.commands.executeCommand('gitcharm.commitPanel.focus');
+    vscode.commands.registerCommand('gitsuite.commit', () => {
+      vscode.commands.executeCommand('gitsuite.commitPanel.focus');
     }),
 
-    vscode.commands.registerCommand('gitcharm.pull', () => {
+    vscode.commands.registerCommand('gitsuite.pull', () => {
       return branchStatusBar.updateProject();
     }),
 
-    vscode.commands.registerCommand('gitcharm.push', async () => {
+    vscode.commands.registerCommand('gitsuite.push', async () => {
       if (!manager) return;
       const metas = manager.getRepoMetas();
       const metaById = new Map(metas.map(m => [m.id, m]));
       await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Pushing all repositories…', cancellable: false },
+        { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Pushing all repositories…', cancellable: false },
         async () => {
           const results = await manager.pushAll();
           const failed = results.filter(r => !r.ok);
           const ok = results.filter(r => r.ok);
           if (failed.length === 0) {
             vscode.window.showInformationMessage(
-              `GitCharm: ${ok.length} ${ok.length === 1 ? 'repository' : 'repositories'} pushed.`
+              `Git Suite: ${ok.length} ${ok.length === 1 ? 'repository' : 'repositories'} pushed.`
             );
           } else {
             const failedDesc = failed.map(r => {
@@ -61,7 +61,7 @@ export function registerCommands(
               return `${name}: ${r.message}`;
             }).join('; ');
             vscode.window.showWarningMessage(
-              `GitCharm: ${ok.length} pushed, ${failed.length} failed: ${failedDesc}`
+              `Git Suite: ${ok.length} pushed, ${failed.length} failed: ${failedDesc}`
             );
           }
         }
@@ -69,13 +69,13 @@ export function registerCommands(
       commitPanel.refresh();
     }),
 
-    vscode.commands.registerCommand('gitcharm.fetchAll', async () => {
+    vscode.commands.registerCommand('gitsuite.fetchAll', async () => {
       if (!manager) return;
       await branchStatusBar.fetchAll();
       commitPanel.refresh();
     }),
 
-    vscode.commands.registerCommand('gitcharm.syncAll', async () => {
+    vscode.commands.registerCommand('gitsuite.syncAll', async () => {
       if (!manager) return;
       const metas = manager.getRepoMetas();
       const metaById = new Map(metas.map(m => [m.id, m]));
@@ -90,7 +90,7 @@ export function registerCommands(
       if (!pick) return;
 
       await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Syncing all repositories…', cancellable: false },
+        { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Syncing all repositories…', cancellable: false },
         async () => {
           // Pull first
           const pullResults = await manager.pullAll(pick.rebase);
@@ -102,7 +102,7 @@ export function registerCommands(
               return `${name}: ${r.message}`;
             }).join('; ');
             vscode.window.showWarningMessage(
-              `GitCharm Sync: Pull failed — stopping before push. ${failedDesc}`
+              `Git Suite Sync: Pull failed — stopping before push. ${failedDesc}`
             );
             commitPanel.refresh();
             return;
@@ -115,7 +115,7 @@ export function registerCommands(
 
           if (pushFailed.length === 0) {
             vscode.window.showInformationMessage(
-              `GitCharm Sync: ${pushOk.length} ${pushOk.length === 1 ? 'repository' : 'repositories'} synced.`
+              `Git Suite Sync: ${pushOk.length} ${pushOk.length === 1 ? 'repository' : 'repositories'} synced.`
             );
           } else {
             const failedDesc = pushFailed.map(r => {
@@ -123,7 +123,7 @@ export function registerCommands(
               return `${name}: ${r.message}`;
             }).join('; ');
             vscode.window.showWarningMessage(
-              `GitCharm Sync: ${pushOk.length} synced, ${pushFailed.length} push failed: ${failedDesc}`
+              `Git Suite Sync: ${pushOk.length} synced, ${pushFailed.length} push failed: ${failedDesc}`
             );
           }
           commitPanel.refresh();
@@ -131,54 +131,54 @@ export function registerCommands(
       );
     }),
 
-    vscode.commands.registerCommand('gitcharm.showBranchMenu', (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.showBranchMenu', (repoId?: string) => {
       branchStatusBar.showMenu(repoId);
     }),
 
-    vscode.commands.registerCommand('gitcharm.showBranchOptions', (repoId: string, branchName: string) => {
+    vscode.commands.registerCommand('gitsuite.showBranchOptions', (repoId: string, branchName: string) => {
       branchStatusBar.showBranchOptions(repoId, branchName);
     }),
 
-    vscode.commands.registerCommand('gitcharm.updateProject', () => {
+    vscode.commands.registerCommand('gitsuite.updateProject', () => {
       branchStatusBar.updateProject();
     }),
 
-    vscode.commands.registerCommand('gitcharm.openSettings', () => {
-      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:rionoir.gitcharm');
+    vscode.commands.registerCommand('gitsuite.openSettings', () => {
+      vscode.commands.executeCommand('workbench.action.openSettings', '@ext:jaypume.gitsuite');
     }),
 
-    vscode.commands.registerCommand('gitcharm.resetViewLocations', async () => {
+    vscode.commands.registerCommand('gitsuite.resetViewLocations', async () => {
       await vscode.commands.executeCommand('workbench.action.resetViewLocations');
       commitPanel.refresh();
     }),
 
-    vscode.commands.registerCommand('gitcharm.openGitAnnotations', async () => {
+    vscode.commands.registerCommand('gitsuite.openGitAnnotations', async () => {
       const editor = vscode.window.activeTextEditor;
       if (editor) await annotationController.openAnnotations(editor);
     }),
 
-    vscode.commands.registerCommand('gitcharm.closeGitAnnotations', () => {
+    vscode.commands.registerCommand('gitsuite.closeGitAnnotations', () => {
       const editor = vscode.window.activeTextEditor;
       if (editor) annotationController.closeAnnotations(editor);
     }),
 
-    vscode.commands.registerCommand('gitcharm.navigateToAnnotationCommit', (hash: string, repoId: string) => {
+    vscode.commands.registerCommand('gitsuite.navigateToAnnotationCommit', (hash: string, repoId: string) => {
       annotationController.navigateToCommit(hash, repoId);
     }),
 
-    vscode.commands.registerCommand('gitcharm.manageHiddenRepos', () => {
+    vscode.commands.registerCommand('gitsuite.manageHiddenRepos', () => {
       commitPanel.manageHiddenRepos();
     }),
 
-    vscode.commands.registerCommand('gitcharm.manageProfiles', () => {
+    vscode.commands.registerCommand('gitsuite.manageProfiles', () => {
       profileStatusBar.showMenu();
     }),
 
-    vscode.commands.registerCommand('gitcharm.switchProfile', () => {
+    vscode.commands.registerCommand('gitsuite.switchProfile', () => {
       profileStatusBar.switchProfile();
     }),
 
-    vscode.commands.registerCommand('gitcharm.reloadRepositories', () => {
+    vscode.commands.registerCommand('gitsuite.reloadRepositories', () => {
       if (manager) {
         manager.reinitializeAndRefresh();
       }
@@ -186,42 +186,42 @@ export function registerCommands(
 
     // ── Submodule commands ────────────────────────────────────────────────────
 
-    vscode.commands.registerCommand('gitcharm.submodule.init', async (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.submodule.init', async (repoId?: string) => {
       const sub = await pickSubmodule(manager, repoId, false);
       if (!sub) return;
       const reqId = Math.random().toString(36).slice(2);
       commitPanel.handleSubmoduleCommand({ type: 'SUBMODULE_INIT', requestId: reqId, parentRepoId: sub.parentRepoId, submodulePath: sub.submodulePath });
     }),
 
-    vscode.commands.registerCommand('gitcharm.submodule.update', async (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.submodule.update', async (repoId?: string) => {
       const sub = await pickSubmodule(manager, repoId, true);
       if (!sub) return;
       const reqId = Math.random().toString(36).slice(2);
       commitPanel.handleSubmoduleCommand({ type: 'SUBMODULE_UPDATE', requestId: reqId, parentRepoId: sub.parentRepoId, submodulePath: sub.submodulePath, recursive: false });
     }),
 
-    vscode.commands.registerCommand('gitcharm.submodule.updateRecursive', async (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.submodule.updateRecursive', async (repoId?: string) => {
       const sub = await pickSubmodule(manager, repoId, true);
       if (!sub) return;
       const reqId = Math.random().toString(36).slice(2);
       commitPanel.handleSubmoduleCommand({ type: 'SUBMODULE_UPDATE', requestId: reqId, parentRepoId: sub.parentRepoId, submodulePath: sub.submodulePath, recursive: true });
     }),
 
-    vscode.commands.registerCommand('gitcharm.submodule.deinit', async (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.submodule.deinit', async (repoId?: string) => {
       const sub = await pickSubmodule(manager, repoId, true);
       if (!sub) return;
       const reqId = Math.random().toString(36).slice(2);
       commitPanel.handleSubmoduleCommand({ type: 'SUBMODULE_DEINIT', requestId: reqId, parentRepoId: sub.parentRepoId, submodulePath: sub.submodulePath, force: false });
     }),
 
-    vscode.commands.registerCommand('gitcharm.submodule.deinitForce', async (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.submodule.deinitForce', async (repoId?: string) => {
       const sub = await pickSubmodule(manager, repoId, true);
       if (!sub) return;
       const reqId = Math.random().toString(36).slice(2);
       commitPanel.handleSubmoduleCommand({ type: 'SUBMODULE_DEINIT', requestId: reqId, parentRepoId: sub.parentRepoId, submodulePath: sub.submodulePath, force: true });
     }),
 
-    vscode.commands.registerCommand('gitcharm.submodule.openInNewWindow', async (repoId?: string) => {
+    vscode.commands.registerCommand('gitsuite.submodule.openInNewWindow', async (repoId?: string) => {
       const metas = manager?.getRepoMetas().filter(m => m.isSubmodule) ?? [];
       let target = repoId ? metas.find(m => m.id === repoId) : undefined;
       if (!target && metas.length === 1) target = metas[0];
@@ -240,8 +240,8 @@ export function registerCommands(
 
     // ── AI provider / model selection ─────────────────────────────────────────
 
-    vscode.commands.registerCommand('gitcharm.selectAiModel', async () => {
-      const config = vscode.workspace.getConfiguration('gitcharm');
+    vscode.commands.registerCommand('gitsuite.selectAiModel', async () => {
+      const config = vscode.workspace.getConfiguration('gitsuite');
       const currentProvider: string = config.get('ai.provider', 'vscode-lm');
 
       type ProviderItem = vscode.QuickPickItem & { providerId: string };
@@ -263,13 +263,13 @@ export function registerCommands(
       providerItems.push({ label: '$(settings-gear) Open AI Settings', description: 'Configure paths, model, diff limits…', providerId: OPEN_SETTINGS_ID, kind: vscode.QuickPickItemKind.Default });
 
       const pickedProvider = await vscode.window.showQuickPick(providerItems, {
-        title: 'GitCharm: Select AI Provider',
+        title: 'Git Suite: Select AI Provider',
         placeHolder: 'Choose a provider…',
       });
       if (!pickedProvider) return;
 
       if (pickedProvider.providerId === OPEN_SETTINGS_ID) {
-        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:rionoir.gitcharm gitcharm.ai');
+        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:jaypume.gitsuite gitsuite.ai');
         return;
       }
 
@@ -297,12 +297,12 @@ export function registerCommands(
         ];
 
         const pickedModel = await vscode.window.showQuickPick(modelItems, {
-          title: 'GitCharm: Select VS Code LM Model',
+          title: 'Git Suite: Select VS Code LM Model',
           placeHolder: 'Pick a model…',
         });
         if (!pickedModel) return;
         await config.update('ai.modelId', pickedModel.modelId, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: VS Code LM — ${pickedModel.modelId || 'Auto'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: VS Code LM — ${pickedModel.modelId || 'Auto'}`);
 
       } else if (pickedProvider.providerId === 'ollama') {
         const ollamaUrl: string = config.get('ai.ollamaUrl', 'http://localhost:11434');
@@ -328,7 +328,7 @@ export function registerCommands(
             modelName: m.name,
           }));
           const picked = await vscode.window.showQuickPick(modelItems, {
-            title: 'GitCharm: Select Ollama Model',
+            title: 'Git Suite: Select Ollama Model',
             placeHolder: 'Pick a local model…',
           });
           if (!picked) return;
@@ -340,7 +340,7 @@ export function registerCommands(
             : undefined;
           if (msg) vscode.window.showWarningMessage(msg);
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: Ollama Model',
+            title: 'Git Suite: Ollama Model',
             prompt: 'Enter the Ollama model name',
             value: currentModel,
             placeHolder: 'e.g. llama3, mistral, qwen3.5:9b',
@@ -350,7 +350,7 @@ export function registerCommands(
         }
 
         await config.update('ai.ollamaModel', chosenModel, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: Ollama — ${chosenModel}`);
+        vscode.window.showInformationMessage(`Git Suite AI: Ollama — ${chosenModel}`);
 
       } else if (pickedProvider.providerId === 'lmstudio') {
         const lmstudioUrl: string = config.get('ai.lmstudioUrl', 'http://localhost:1234');
@@ -375,7 +375,7 @@ export function registerCommands(
             modelId: m.id,
           }));
           const picked = await vscode.window.showQuickPick(modelItems, {
-            title: 'GitCharm: Select LM Studio Model',
+            title: 'Git Suite: Select LM Studio Model',
             placeHolder: 'Pick a loaded model…',
           });
           if (!picked) return;
@@ -383,7 +383,7 @@ export function registerCommands(
         } else {
           vscode.window.showWarningMessage('Could not reach LM Studio. Make sure it is running and the server is started.');
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: LM Studio Model',
+            title: 'Git Suite: LM Studio Model',
             prompt: 'Enter the model identifier (as shown in LM Studio)',
             value: currentModel,
             placeHolder: 'e.g. lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF',
@@ -393,7 +393,7 @@ export function registerCommands(
         }
 
         await config.update('ai.lmstudioModel', chosenModel, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: LM Studio — ${chosenModel || 'default'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: LM Studio — ${chosenModel || 'default'}`);
 
       } else if (pickedProvider.providerId === 'claude-api') {
         const currentModel: string = config.get('ai.claudeModel', '');
@@ -406,14 +406,14 @@ export function registerCommands(
           { label: '$(edit) Enter model ID…', description: 'Specify a custom model ID', modelId: CUSTOM_ID },
         ];
         const pickedClaudeApi = await vscode.window.showQuickPick(claudeApiModels, {
-          title: 'GitCharm: Select Claude Model',
+          title: 'Git Suite: Select Claude Model',
           placeHolder: 'Pick a model…',
         });
         if (!pickedClaudeApi) return;
         let chosenClaudeApi = pickedClaudeApi.modelId;
         if (chosenClaudeApi === CUSTOM_ID) {
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: Claude Model ID',
+            title: 'Git Suite: Claude Model ID',
             prompt: 'Enter the full model ID',
             value: currentModel,
             placeHolder: 'e.g. claude-opus-4-8',
@@ -422,7 +422,7 @@ export function registerCommands(
           chosenClaudeApi = input.trim();
         }
         await config.update('ai.claudeModel', chosenClaudeApi, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: Claude API — ${chosenClaudeApi || 'default'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: Claude API — ${chosenClaudeApi || 'default'}`);
 
       } else if (pickedProvider.providerId === 'openai-api') {
         const currentModel: string = config.get('ai.openaiModel', 'gpt-4o');
@@ -436,14 +436,14 @@ export function registerCommands(
           { label: '$(edit) Enter model ID…', description: 'Specify a custom model ID', modelId: CUSTOM_ID },
         ];
         const pickedOpenAI = await vscode.window.showQuickPick(openaiModels, {
-          title: 'GitCharm: Select OpenAI Model',
+          title: 'Git Suite: Select OpenAI Model',
           placeHolder: 'Pick a model…',
         });
         if (!pickedOpenAI) return;
         let chosenOpenAI = pickedOpenAI.modelId;
         if (chosenOpenAI === CUSTOM_ID) {
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: OpenAI Model ID',
+            title: 'Git Suite: OpenAI Model ID',
             prompt: 'Enter the full model ID',
             value: currentModel,
             placeHolder: 'e.g. gpt-4o, o3',
@@ -452,7 +452,7 @@ export function registerCommands(
           chosenOpenAI = input.trim();
         }
         await config.update('ai.openaiModel', chosenOpenAI, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: OpenAI API — ${chosenOpenAI || 'default'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: OpenAI API — ${chosenOpenAI || 'default'}`);
 
       } else if (pickedProvider.providerId === 'claude-cli') {
         const currentModel: string = config.get('ai.claudeModel', '');
@@ -466,14 +466,14 @@ export function registerCommands(
           { label: '$(edit) Enter model ID…', description: 'Specify a custom model ID', modelId: CUSTOM_ID },
         ];
         const pickedClaude = await vscode.window.showQuickPick(claudeModels, {
-          title: 'GitCharm: Select Claude Model',
+          title: 'Git Suite: Select Claude Model',
           placeHolder: 'Pick a model…',
         });
         if (!pickedClaude) return;
         let chosenClaude = pickedClaude.modelId;
         if (chosenClaude === CUSTOM_ID) {
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: Claude Model ID',
+            title: 'Git Suite: Claude Model ID',
             prompt: 'Enter the full model ID',
             value: currentModel,
             placeHolder: 'e.g. claude-opus-4-7',
@@ -482,7 +482,7 @@ export function registerCommands(
           chosenClaude = input.trim();
         }
         await config.update('ai.claudeModel', chosenClaude, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: Claude CLI — ${chosenClaude || 'default'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: Claude CLI — ${chosenClaude || 'default'}`);
 
       } else if (pickedProvider.providerId === 'codex-cli') {
         const currentModel: string = config.get('ai.codexModel', '');
@@ -496,14 +496,14 @@ export function registerCommands(
           { label: '$(edit) Enter model ID…', description: 'Specify a custom model ID', modelId: CUSTOM_ID },
         ];
         const pickedCodex = await vscode.window.showQuickPick(codexModels, {
-          title: 'GitCharm: Select Codex Model',
+          title: 'Git Suite: Select Codex Model',
           placeHolder: 'Pick a model…',
         });
         if (!pickedCodex) return;
         let chosenCodex = pickedCodex.modelId;
         if (chosenCodex === CUSTOM_ID) {
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: Codex Model ID',
+            title: 'Git Suite: Codex Model ID',
             prompt: 'Enter the full model ID',
             value: currentModel,
             placeHolder: 'e.g. o3, o4-mini',
@@ -512,7 +512,7 @@ export function registerCommands(
           chosenCodex = input.trim();
         }
         await config.update('ai.codexModel', chosenCodex, vscode.ConfigurationTarget.Global);
-        vscode.window.showInformationMessage(`GitCharm AI: Codex CLI — ${chosenCodex || 'default'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: Codex CLI — ${chosenCodex || 'default'}`);
 
       } else if (pickedProvider.providerId === 'gemini-api' || pickedProvider.providerId === 'gemini-cli') {
         const isApi = pickedProvider.providerId === 'gemini-api';
@@ -527,14 +527,14 @@ export function registerCommands(
           { label: '$(edit) Enter model ID…', description: 'Specify a custom model ID', modelId: CUSTOM_ID },
         ];
         const pickedGemini = await vscode.window.showQuickPick(geminiModels, {
-          title: `GitCharm: Select Gemini Model`,
+          title: `Git Suite: Select Gemini Model`,
           placeHolder: 'Pick a model…',
         });
         if (!pickedGemini) return;
         let chosenGemini = pickedGemini.modelId;
         if (chosenGemini === CUSTOM_ID) {
           const input = await vscode.window.showInputBox({
-            title: 'GitCharm: Gemini Model ID',
+            title: 'Git Suite: Gemini Model ID',
             prompt: 'Enter the full model ID',
             value: currentModel,
             placeHolder: 'e.g. gemini-2.5-pro',
@@ -544,12 +544,12 @@ export function registerCommands(
         }
         await config.update('ai.geminiModel', chosenGemini, vscode.ConfigurationTarget.Global);
         const label = isApi ? 'Gemini API' : 'Gemini CLI';
-        vscode.window.showInformationMessage(`GitCharm AI: ${label} — ${chosenGemini || 'default'}`);
+        vscode.window.showInformationMessage(`Git Suite AI: ${label} — ${chosenGemini || 'default'}`);
       }
     }),
 
     // ── Worktree commands ─────────────────────────────────────────────────────
-    vscode.commands.registerCommand('gitcharm.worktree.add', async () => {
+    vscode.commands.registerCommand('gitsuite.worktree.add', async () => {
       if (!commitPanel) return;
       // Determine which repo to use
       const metas = manager?.getRepoMetas().filter(m => (m.depth ?? 0) === 0) ?? [];
@@ -568,7 +568,7 @@ export function registerCommands(
       commitPanel.handleSubmoduleCommand({ type: 'WORKTREE_CREATE_PROMPT', repoId });
     }),
 
-    vscode.commands.registerCommand('gitcharm.worktree.prune', async () => {
+    vscode.commands.registerCommand('gitsuite.worktree.prune', async () => {
       if (!commitPanel) return;
       const metas = manager?.getRepoMetas().filter(m => (m.depth ?? 0) === 0) ?? [];
       let repoId: string | undefined;
@@ -588,12 +588,12 @@ export function registerCommands(
 
     // ── File History ──────────────────────────────────────────────────────────
 
-    vscode.commands.registerCommand('gitcharm.showFileHistory', async (uri?: vscode.Uri) => {
+    vscode.commands.registerCommand('gitsuite.showFileHistory', async (uri?: vscode.Uri) => {
       if (!manager || !extensionUri) return;
       // uri comes from explorer/context or editor/context; fall back to active editor
       const fileUri = uri ?? vscode.window.activeTextEditor?.document.uri;
       if (!fileUri || fileUri.scheme !== 'file') {
-        vscode.window.showInformationMessage('GitCharm: Open a file to view its history.');
+        vscode.window.showInformationMessage('Git Suite: Open a file to view its history.');
         return;
       }
       await openFileHistoryPanel(extensionUri, manager, fileUri, logPanel);
@@ -627,7 +627,7 @@ export function registerCommands(
         conflictedFiles.delete(doc.uri.fsPath);
         // Delay to run after VS Code's built-in SCM view focus
         setTimeout(() => {
-          vscode.commands.executeCommand('gitcharm.commitPanel.focus');
+          vscode.commands.executeCommand('gitsuite.commitPanel.focus');
         }, 300);
       }
     }),

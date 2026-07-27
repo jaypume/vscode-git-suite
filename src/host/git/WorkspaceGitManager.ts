@@ -67,9 +67,9 @@ export class WorkspaceGitManager implements vscode.Disposable {
       // Repository discovery settings affect the repo set, watcher patterns, and colors.
       vscode.workspace.onDidChangeConfiguration((e) => {
         if (
-          e.affectsConfiguration('gitcharm.repositoryScanMaxDepth') ||
-          e.affectsConfiguration('gitcharm.repositoryScanIgnoredFolders') ||
-          e.affectsConfiguration('gitcharm.projectColors')
+          e.affectsConfiguration('gitsuite.repositoryScanMaxDepth') ||
+          e.affectsConfiguration('gitsuite.repositoryScanIgnoredFolders') ||
+          e.affectsConfiguration('gitsuite.projectColors')
         ) {
           this.reinitialize();
           this.setupGitInitWatchers();
@@ -130,7 +130,7 @@ export class WorkspaceGitManager implements vscode.Disposable {
   }
 
   private fetchOnStartupIfEnabled(onDone: () => void): void {
-    const enabled = vscode.workspace.getConfiguration('gitcharm').get<boolean>('fetchOnStartup', true);
+    const enabled = vscode.workspace.getConfiguration('gitsuite').get<boolean>('fetchOnStartup', true);
     if (enabled) {
       this.fetchAll().catch(console.error).finally(onDone);
     } else {
@@ -148,7 +148,7 @@ export class WorkspaceGitManager implements vscode.Disposable {
     this.initialStatusDone = false;
 
     const folders = vscode.workspace.workspaceFolders ?? [];
-    const customColors = vscode.workspace.getConfiguration('gitcharm').get<Record<string, string>>('projectColors', {});
+    const customColors = vscode.workspace.getConfiguration('gitsuite').get<Record<string, string>>('projectColors', {});
 
     // Shared counter so every repo (workspace folder, scanned repo, or submodule)
     // gets its own palette slot — submodules are visually distinct, just like multi-repo.
@@ -183,7 +183,7 @@ export class WorkspaceGitManager implements vscode.Disposable {
 
   private getRepositoryScanMaxDepth(): number {
     const value = vscode.workspace
-      .getConfiguration('gitcharm')
+      .getConfiguration('gitsuite')
       .get<number>('repositoryScanMaxDepth', DEFAULT_REPOSITORY_SCAN_MAX_DEPTH);
 
     if (typeof value !== 'number' || !Number.isFinite(value)) {
@@ -194,7 +194,7 @@ export class WorkspaceGitManager implements vscode.Disposable {
 
   private getRepositoryScanIgnoredFolders(): string[] {
     const value = vscode.workspace
-      .getConfiguration('gitcharm')
+      .getConfiguration('gitsuite')
       .get<string[]>('repositoryScanIgnoredFolders', DEFAULT_REPOSITORY_SCAN_IGNORED_FOLDERS);
 
     return Array.isArray(value)
@@ -425,7 +425,7 @@ export class WorkspaceGitManager implements vscode.Disposable {
 
   private setupWatcher(repoPath: string, repoId: string): void {
     // Primary: VS Code Git API state changes — fired for all git operations
-    // (built-in git, GitCharm, terminal, other extensions).
+    // (built-in git, Git Suite, terminal, other extensions).
     const vsRepo = getVscodeRepository(repoPath);
     if (vsRepo) {
       this.prevHeads.set(repoId, vsRepo.state.HEAD?.name ?? '');
@@ -520,7 +520,7 @@ export class WorkspaceGitManager implements vscode.Disposable {
     this.initialStatusDone = true;
 
     if (newlyUntracked.length > 0) {
-      const cfg = vscode.workspace.getConfiguration('gitcharm');
+      const cfg = vscode.workspace.getConfiguration('gitsuite');
       const enabled = cfg.get<boolean>('promptAddUntrackedToGit', true);
       const viewMode = cfg.get<string>('changesViewMode', 'simplified');
       if (enabled && viewMode !== 'simplified') {

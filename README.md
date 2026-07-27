@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="media/icons/gitcharm.png" alt="GitCharm" width="160">
+  <img src="media/icons/gitsuite.png" alt="Git Suite" width="160">
 </p>
 
-<h1 align="center">GitCharm</h1>
+<h1 align="center">Git Suite</h1>
 
 <p align="center">
   JetBrains-like Git management for VS Code.
@@ -13,15 +13,15 @@
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-1.85%2B-007ACC">
   <img alt="Node" src="https://img.shields.io/badge/Node-18%2B-339933">
   <img alt="License" src="https://img.shields.io/badge/License-GPL--3.0-red">
-  <img alt="GitHub forks" src="https://img.shields.io/github/forks/RioNoir/GitCharm?style=flat&logo=github&label=Forks&color=orange">
-  <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/RioNoir/GitCharm?style=flat&logo=GitHub&label=Stars&color=yellow">
+  <img alt="GitHub forks" src="https://img.shields.io/github/forks/jaypume/vscode-git-suite?style=flat&logo=github&label=Forks&color=orange">
+  <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/jaypume/vscode-git-suite?style=flat&logo=GitHub&label=Stars&color=yellow">
 </p>
 
-GitCharm brings a JetBrains-like Git workflow to Visual Studio Code: a focused Commit panel, a Git Log panel with graph and branch operations, multi-repository awareness, shelving/stashing tools, push helpers, and a 3-way merge editor for conflict resolution.
+Git Suite brings a JetBrains-like Git workflow to Visual Studio Code: a focused Commit panel, a Git Log panel with graph and branch operations, multi-repository awareness, shelving/stashing tools, push helpers, and a 3-way merge editor for conflict resolution.
 
 It activates automatically when the opened workspace contains a Git repository.
 
-<img src="media/screenshots/full.png" alt="GitCharm">
+<img src="media/screenshots/full.png" alt="Git Suite">
 
 ## ✨ Features
 
@@ -38,7 +38,7 @@ It activates automatically when the opened workspace contains a Git repository.
 
 #### View Modes
 
-On first install, a QuickPick lets you choose your preferred view mode. You can change it at any time via `gitcharm.changesViewMode` in Settings.
+On first install, a QuickPick lets you choose your preferred view mode. You can change it at any time via `gitsuite.changesViewMode` in Settings.
 
 | Mode | Description |
 |:--|:--|
@@ -46,7 +46,7 @@ On first install, a QuickPick lets you choose your preferred view mode. You can 
 | **Changelists** | PhpStorm-style named changelists; files can be moved between lists |
 | **VS Code** | Native-style Staged Changes / Changes sections with inline stage/unstage buttons |
 
-<img src="media/screenshots/view_mode.png" alt="GitCharm view modes">
+<img src="media/screenshots/view_mode.png" alt="Git Suite view modes">
 
 #### Changelists
 
@@ -84,11 +84,11 @@ On first install, a QuickPick lets you choose your preferred view mode. You can 
 - Stashes are shown as native nodes directly in the Git Log commit list.
 - Row selection is maintained when the context menu is open, matching the behavior of other tabs.
 
-<img src="media/screenshots/shelf_stash_push.png" alt="GitCharm commit panel">
+<img src="media/screenshots/shelf_stash_push.png" alt="Git Suite commit panel">
 
 ### 🪟 Undocked Panel
 
-- **Undock…** in the Git Log burger menu (or `GitCharm: Undock` in the Command Palette) opens a native QuickPick with four options:
+- **Undock…** in the Git Log burger menu (or `Git Suite: Undock` in the Command Palette) opens a native QuickPick with four options:
   - **Undock in Editor Tab (Log & Commit)** — opens a resizable editor tab with Commit Panel on the left and Git Log on the right.
   - **Undock in New Window (Log & Commit)** — same layout in a separate VS Code window.
   - **Undock in Editor Tab** — editor tab with the Git Log only.
@@ -121,7 +121,7 @@ On first install, a QuickPick lets you choose your preferred view mode. You can 
 - Hides `origin/HEAD` from the remote branches list.
 
 <br>
-<img src="media/screenshots/log_options.png" alt="GitCharm log panel">
+<img src="media/screenshots/log_options.png" alt="Git Suite log panel">
 
 ### 🌿 Branch Status Bar & Git Menu
 
@@ -133,20 +133,20 @@ On first install, a QuickPick lets you choose your preferred view mode. You can 
 - Tracks the active editor to reflect the correct repository in multi-repo workspaces.
 
 <br>
-<img src="media/screenshots/branches_menu.png" alt="GitCharm branches menu">
+<img src="media/screenshots/branches_menu.png" alt="Git Suite branches menu">
 
 ### 👤 Git Profiles
 
 - Named identity profiles (display name, `git user.name`, `git user.email`) stored in workspace settings.
 - Status bar item showing the active profile; click to switch, create, edit, delete, or set a default.
-- Fallback chain: active GitCharm profile → Local (repo `.git/config`) → Global (`git config --global`).
+- Fallback chain: active Git Suite profile → Local (repo `.git/config`) → Global (`git config --global`).
 - Set **Local** or **Global** as the default source per workspace without creating a named profile.
 - Reserved names `Local` and `Global` are displayed as implicit entries with source tooltip.
 - Active profile applied automatically to the local repo config before every commit.
 - Each workspace/repository can use a different identity.
 
 <br>
-<img src="media/screenshots/git_profiles.png" alt="GitCharm git profiles">
+<img src="media/screenshots/git_profiles.png" alt="Git Suite git profiles">
 
 ### 🔍 Git Annotations (Blame)
 
@@ -157,7 +157,7 @@ On first install, a QuickPick lets you choose your preferred view mode. You can 
 - Layout adapts around edits, tabs, CodeLens, and editor alignment.
 
 <br>
-<img src="media/screenshots/git_annotations.png" alt="GitCharm annotations">
+<img src="media/screenshots/git_annotations.png" alt="Git Suite annotations">
 
 ### 🗂️ Multi-Repository Workspaces
 
@@ -188,7 +188,7 @@ On first install, a QuickPick lets you choose your preferred view mode. You can 
 - Git installed and available in the workspace.
 - Node.js `18` or newer and npm for development or packaging.
 
-GitCharm uses VS Code's built-in Git extension when available and falls back to direct Git operations through `simple-git`.
+Git Suite uses VS Code's built-in Git extension when available and falls back to direct Git operations through `simple-git`.
 
 ## 📦 Installation
 
@@ -205,7 +205,7 @@ npm run package
 Then install the generated `.vsix`:
 
 ```bash
-code --install-extension gitcharm-0.3.5.vsix
+code --install-extension gitsuite-0.4.0.vsix
 ```
 
 ### Development Host
@@ -227,10 +227,10 @@ npm run watch
 
 ## 🛠️ Usage
 
-Open a workspace that contains one or more Git repositories. GitCharm adds:
+Open a workspace that contains one or more Git repositories. Git Suite adds:
 
-- **GitCharm Commit** in the Activity Bar.
-- **GitCharm Log** in the bottom Panel.
+- **Git Suite Commit** in the Activity Bar.
+- **Git Suite Log** in the bottom Panel.
 - A **branch item** and a **profile item** in the Status Bar.
 - Commands in the Command Palette.
 
@@ -244,65 +244,65 @@ Use the Status Bar branch menu for fast project-wide actions such as updating al
 
 | Command | Description |
 |:--|:--|
-| `GitCharm: Focus Git Log` | Focuses the Git Log panel. |
-| `GitCharm: Fetch All` | Fetches all remotes across all repositories. |
-| `GitCharm: Pull` | Pulls all repositories (prompts for merge or rebase strategy). |
-| `GitCharm: Push` | Pushes all repositories. |
-| `GitCharm: Sync All` | Pulls then pushes all repositories; stops if any pull fails. |
-| `GitCharm: Open Merge Editor` | Opens the merge editor for the active file when conflict markers are present. |
-| `GitCharm: Branch Menu` | Opens the Status Bar branch menu. |
-| `GitCharm: Settings` | Opens GitCharm settings. |
-| `GitCharm: Manage Git Profiles` | Opens the Git profile manager. |
-| `GitCharm: Switch Git Profile` | Switches the active Git profile for the current workspace. |
-| `GitCharm: Open Git Annotations` | Shows inline blame annotations in the active editor. |
-| `GitCharm: Close Git Annotations` | Hides inline blame annotations in the active editor. |
-| `GitCharm: Undock` | Opens a QuickPick to undock the Git Log (with or without the Commit Panel) into an editor tab or a new window. |
-| `GitCharm: Select AI Provider` | Opens a QuickPick to choose and configure the AI provider and model. |
-| `GitCharm: Generate Commit Message` | Generates an AI commit message from the current staged diff. |
-| `GitCharm: Explain Commit` | Opens the commit detail panel with an AI-generated explanation of the selected commit. |
+| `Git Suite: Focus Git Log` | Focuses the Git Log panel. |
+| `Git Suite: Fetch All` | Fetches all remotes across all repositories. |
+| `Git Suite: Pull` | Pulls all repositories (prompts for merge or rebase strategy). |
+| `Git Suite: Push` | Pushes all repositories. |
+| `Git Suite: Sync All` | Pulls then pushes all repositories; stops if any pull fails. |
+| `Git Suite: Open Merge Editor` | Opens the merge editor for the active file when conflict markers are present. |
+| `Git Suite: Branch Menu` | Opens the Status Bar branch menu. |
+| `Git Suite: Settings` | Opens Git Suite settings. |
+| `Git Suite: Manage Git Profiles` | Opens the Git profile manager. |
+| `Git Suite: Switch Git Profile` | Switches the active Git profile for the current workspace. |
+| `Git Suite: Open Git Annotations` | Shows inline blame annotations in the active editor. |
+| `Git Suite: Close Git Annotations` | Hides inline blame annotations in the active editor. |
+| `Git Suite: Undock` | Opens a QuickPick to undock the Git Log (with or without the Commit Panel) into an editor tab or a new window. |
+| `Git Suite: Select AI Provider` | Opens a QuickPick to choose and configure the AI provider and model. |
+| `Git Suite: Generate Commit Message` | Generates an AI commit message from the current staged diff. |
+| `Git Suite: Explain Commit` | Opens the commit detail panel with an AI-generated explanation of the selected commit. |
 
 ## ⌨️ Keybindings
 
 | Keybinding | macOS | Command |
 |:--|:--|:--|
-| `Ctrl+Alt+L` | `Cmd+Alt+L` | `GitCharm: Focus Git Log` |
-| `Ctrl+Alt+K` | `Cmd+Alt+K` | `GitCharm: Commit` |
+| `Ctrl+Alt+L` | `Cmd+Alt+L` | `Git Suite: Focus Git Log` |
+| `Ctrl+Alt+K` | `Cmd+Alt+K` | `Git Suite: Commit` |
 
 ## ⚙️ Settings
 
 | Setting | Default | Description |
 |:--|:--|:--|
-| `gitcharm.graphMaxCommits` | `1000` | Maximum number of commits loaded into the Git Log graph. |
-| `gitcharm.fetchOnStartup` | `true` | Fetches all remotes once when GitCharm activates. |
-| `gitcharm.projectColors` | `{}` | Maps workspace folder/repository names to hex colors for multi-repo views. |
-| `gitcharm.repositoryScanMaxDepth` | `1` | Maximum depth of workspace subfolders to scan for Git repositories. `0` only checks workspace folders. |
-| `gitcharm.repositoryScanIgnoredFolders` | `["node_modules"]` | Folder names or workspace-relative paths skipped while scanning for nested Git repositories. |
-| `gitcharm.autoRefreshInterval` | `0` | Auto-refresh interval in seconds. `0` disables interval refresh and uses file watchers only. |
-| `gitcharm.changesViewMode` | `"simplified"` | How to display changed files: `simplified`, `changelists`, or `vscode`. Chosen via QuickPick on first install. |
-| `gitcharm.gitAnnotations.enabled` | `true` | Enable inline Git blame annotations in the editor. |
-| `gitcharm.gitGhostText.enabled` | `true` | Enable inline Git ghost text in the editor. |
-| `gitcharm.gitProfiles` | `[]` | Named Git identity profiles (name, email) managed by GitCharm. |
-| `gitcharm.activeGitProfileId` | `""` | ID of the currently active Git profile for this workspace. |
-| `gitcharm.suppressDivergedWarning` | `false` | Suppress the "diverged" warning in the status bar when local and remote have diverged. |
-| `gitcharm.ai.enabled` | `false` | Enable AI-powered features (commit message generation, commit explanation). |
-| `gitcharm.ai.provider` | `"copilot"` | AI provider: `copilot`, `anthropic`, `openai`, `claude-cli`, `codex-cli`, `gemini-cli`, `gemini-api`, `ollama`, or `lmstudio`. |
-| `gitcharm.ai.model` | `""` | Model identifier for the selected provider (leave empty to use the provider default). |
-| `gitcharm.ai.language` | `""` | Language for AI-generated text (e.g. `en`, `it`). Defaults to English when empty. |
-| `gitcharm.ai.anthropicApiKey` | `""` | API key for the Anthropic provider. |
-| `gitcharm.ai.openaiApiKey` | `""` | API key for the OpenAI provider. |
-| `gitcharm.ai.geminiApiKey` | `""` | API key for the Gemini API provider. |
+| `gitsuite.graphMaxCommits` | `1000` | Maximum number of commits loaded into the Git Log graph. |
+| `gitsuite.fetchOnStartup` | `true` | Fetches all remotes once when Git Suite activates. |
+| `gitsuite.projectColors` | `{}` | Maps workspace folder/repository names to hex colors for multi-repo views. |
+| `gitsuite.repositoryScanMaxDepth` | `1` | Maximum depth of workspace subfolders to scan for Git repositories. `0` only checks workspace folders. |
+| `gitsuite.repositoryScanIgnoredFolders` | `["node_modules"]` | Folder names or workspace-relative paths skipped while scanning for nested Git repositories. |
+| `gitsuite.autoRefreshInterval` | `0` | Auto-refresh interval in seconds. `0` disables interval refresh and uses file watchers only. |
+| `gitsuite.changesViewMode` | `"simplified"` | How to display changed files: `simplified`, `changelists`, or `vscode`. Chosen via QuickPick on first install. |
+| `gitsuite.gitAnnotations.enabled` | `true` | Enable inline Git blame annotations in the editor. |
+| `gitsuite.gitGhostText.enabled` | `true` | Enable inline Git ghost text in the editor. |
+| `gitsuite.gitProfiles` | `[]` | Named Git identity profiles (name, email) managed by Git Suite. |
+| `gitsuite.activeGitProfileId` | `""` | ID of the currently active Git profile for this workspace. |
+| `gitsuite.suppressDivergedWarning` | `false` | Suppress the "diverged" warning in the status bar when local and remote have diverged. |
+| `gitsuite.ai.enabled` | `false` | Enable AI-powered features (commit message generation, commit explanation). |
+| `gitsuite.ai.provider` | `"copilot"` | AI provider: `copilot`, `anthropic`, `openai`, `claude-cli`, `codex-cli`, `gemini-cli`, `gemini-api`, `ollama`, or `lmstudio`. |
+| `gitsuite.ai.model` | `""` | Model identifier for the selected provider (leave empty to use the provider default). |
+| `gitsuite.ai.language` | `""` | Language for AI-generated text (e.g. `en`, `it`). Defaults to English when empty. |
+| `gitsuite.ai.anthropicApiKey` | `""` | API key for the Anthropic provider. |
+| `gitsuite.ai.openaiApiKey` | `""` | API key for the OpenAI provider. |
+| `gitsuite.ai.geminiApiKey` | `""` | API key for the Gemini API provider. |
 
 Example:
 
 ```json
 {
-  "gitcharm.fetchOnStartup": true,
-  "gitcharm.graphMaxCommits": 2000,
-  "gitcharm.projectColors": {
+  "gitsuite.fetchOnStartup": true,
+  "gitsuite.graphMaxCommits": 2000,
+  "gitsuite.projectColors": {
     "api": "#ff6b6b",
     "web": "#4ec9b0"
   },
-  "gitcharm.gitAnnotations.enabled": true
+  "gitsuite.gitAnnotations.enabled": true
 }
 ```
 
@@ -338,7 +338,7 @@ out/                      Built extension and webview bundles
 
 ## 📌 Notes
 
-- GitCharm is designed for Git workspaces and multi-root workspaces where each folder may be its own repository.
+- Git Suite is designed for Git workspaces and multi-root workspaces where each folder may be its own repository.
 - Destructive operations (rollback, delete, branch delete, reset, stash drop, shelve drop, commit undo) ask for confirmation.
 - AI commit-message generation requires an available VS Code language model such as GitHub Copilot.
 - The merge editor works on files that contain Git conflict markers.

@@ -100,7 +100,7 @@ export const BranchSidebar = forwardRef<HTMLDivElement, Props>(function BranchSi
   const [tagContextMenu, setTagContextMenu] = useState<{ mergedTag: MergedTag; x: number; y: number } | null>(null);
 
   useEffect(() => {
-    const id = 'gitcharm-branch-ctx-hover';
+    const id = 'gitsuite-branch-ctx-hover';
     if (document.getElementById(id)) return;
     const s = document.createElement('style');
     s.id = id;

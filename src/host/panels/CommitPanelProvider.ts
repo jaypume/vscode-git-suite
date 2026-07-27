@@ -21,7 +21,7 @@ import { LOCAL_PROFILE_ID, GLOBAL_PROFILE_ID } from '../git/GitProfileService';
 import type { BranchStatusBar } from '../ui/BranchStatusBar';
 
 export class CommitPanelProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = 'gitcharm.commitPanel';
+  public static readonly viewType = 'gitsuite.commitPanel';
   private view?: vscode.WebviewView;
   private logProvider?: GitLogPanelProvider;
   private undockedPanel?: UndockedPanelProvider;
@@ -134,7 +134,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
 
     const result = await this.profileService.getEffectiveProfile(resolvedPath);
     if (!result) {
-      vscode.window.showWarningMessage('GitCharm: No Git identity configured. Set a profile before committing.');
+      vscode.window.showWarningMessage('Git Suite: No Git identity configured. Set a profile before committing.');
       return undefined;
     }
     if (result.source === 'local' || result.source === 'global') return undefined;
@@ -160,7 +160,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       webviewView.webview,
       this.extensionUri,
       'commitPanel',
-      'GitCharm Commit'
+      'Git Suite Commit'
     );
 
     webviewView.webview.onDidReceiveMessage((msg: CommitToHostMsg) =>
@@ -199,12 +199,12 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           }).catch(() => { /* icon theme optional */ });
         }
       }
-      if (e.affectsConfiguration('gitcharm.ai.enabled')) {
+      if (e.affectsConfiguration('gitsuite.ai.enabled')) {
         this.manager.getAllStatuses().then(status => {
           this.post({ type: 'COMMIT_STATUS_UPDATE', repos: this.manager.getRepoMetas(), status });
         });
       }
-      if (e.affectsConfiguration('gitcharm.changesViewMode') || e.affectsConfiguration('gitcharm.defaultCommitAction') || e.affectsConfiguration('gitcharm.defaultSaveAction')) {
+      if (e.affectsConfiguration('gitsuite.changesViewMode') || e.affectsConfiguration('gitsuite.defaultCommitAction') || e.affectsConfiguration('gitsuite.defaultSaveAction')) {
         this.changelistService?.setChangelistMode(this.getChangesViewMode() === 'changelists');
         this.manager.getAllStatuses().then(status => {
           this.postChangelistsUpdate(status);
@@ -286,7 +286,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
   }
 
   private getChangesViewMode(): 'simplified' | 'changelists' | 'vscode' {
-    return vscode.workspace.getConfiguration('gitcharm').get<'simplified' | 'changelists' | 'vscode'>('changesViewMode', 'simplified');
+    return vscode.workspace.getConfiguration('gitsuite').get<'simplified' | 'changelists' | 'vscode'>('changesViewMode', 'simplified');
   }
 
   private getFileViewMode(): 'flat' | 'tree' {
@@ -294,23 +294,23 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
   }
 
   private getDefaultCommitAction(): 'commit' | 'commitAndPush' {
-    return vscode.workspace.getConfiguration('gitcharm').get<'commit' | 'commitAndPush'>('defaultCommitAction', 'commit');
+    return vscode.workspace.getConfiguration('gitsuite').get<'commit' | 'commitAndPush'>('defaultCommitAction', 'commit');
   }
 
   private getDefaultSaveAction(): 'stash' | 'shelve' {
-    return vscode.workspace.getConfiguration('gitcharm').get<'stash' | 'shelve'>('defaultSaveAction', 'stash');
+    return vscode.workspace.getConfiguration('gitsuite').get<'stash' | 'shelve'>('defaultSaveAction', 'stash');
   }
 
   private getAiEnabled(): boolean {
-    return vscode.workspace.getConfiguration('gitcharm').get<boolean>('ai.enabled', true);
+    return vscode.workspace.getConfiguration('gitsuite').get<boolean>('ai.enabled', true);
   }
 
   private getHiddenRepoIds(): string[] {
-    return this.workspaceState?.get<string[]>('gitcharm.hiddenRepoIds', []) ?? [];
+    return this.workspaceState?.get<string[]>('gitsuite.hiddenRepoIds', []) ?? [];
   }
 
   private async setHiddenRepoIds(ids: string[]): Promise<void> {
-    await this.workspaceState?.update('gitcharm.hiddenRepoIds', ids);
+    await this.workspaceState?.update('gitsuite.hiddenRepoIds', ids);
     this.post({ type: 'COMMIT_HIDDEN_REPOS_UPDATE', hiddenRepoIds: ids });
     this.logProvider?.notifyHiddenReposChanged(ids);
     this.badgeController?.setHiddenRepoIds(ids);
@@ -333,7 +333,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
   async manageHiddenRepos(): Promise<void> {
     const hidden = this.getHiddenRepoIds();
     if (hidden.length === 0) {
-      vscode.window.showInformationMessage('GitCharm: No hidden repositories.');
+      vscode.window.showInformationMessage('Git Suite: No hidden repositories.');
       return;
     }
     const allMetas = this.manager.getRepoMetas();
@@ -549,7 +549,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) { this.post({ type: 'COMMIT_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Repo not found' }); return; }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Commit & Push', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Commit & Push', cancellable: false },
           async () => {
             try {
               const creds = await this.getCommitCredentials(repo.rootPath);
@@ -586,14 +586,14 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
             } else {
               const names = noRemoteRepoIds.map(id => id.split('/').pop() ?? id);
               vscode.window.showInformationMessage(
-                `GitCharm: Cannot push — no remote configured for: ${names.join(', ')}. Add a remote first (git remote add <name> <url>).`
+                `Git Suite: Cannot push — no remote configured for: ${names.join(', ')}. Add a remote first (git remote add <name> <url>).`
               );
             }
             return;
           }
         }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: `GitCharm: Committing ${msg.repos.length} ${msg.repos.length === 1 ? 'repository' : 'repositories'}`, cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: `Git Suite: Committing ${msg.repos.length} ${msg.repos.length === 1 ? 'repository' : 'repositories'}`, cancellable: false },
           async () => {
             const errors: string[] = [];
             // Commit submodules before parent repos so the parent's pointer update
@@ -635,18 +635,18 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       }
 
       case 'OPEN_PROFILES_MENU': {
-        vscode.commands.executeCommand('gitcharm.manageProfiles');
+        vscode.commands.executeCommand('gitsuite.manageProfiles');
         break;
       }
 
       case 'COMMIT_PULL_ALL': {
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Pulling all repositories', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Pulling all repositories', cancellable: false },
           async (progress) => {
             const results = await this.manager.pullAll();
             const failed = results.filter(r => !r.ok);
             if (failed.length > 0) {
-              vscode.window.showWarningMessage(`GitCharm: ${failed.length} pull(s) failed`);
+              vscode.window.showWarningMessage(`Git Suite: ${failed.length} pull(s) failed`);
             }
           }
         );
@@ -704,7 +704,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           break;
         }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Pushing', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Pushing', cancellable: false },
           async () => {
             try {
               await repo.push(msg.force ?? false, msg.remote);
@@ -724,7 +724,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) { this.post({ type: 'COMMIT_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Repo not found' }); return; }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Syncing', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Syncing', cancellable: false },
           async () => {
             try {
               await (msg.rebase ? repo.pullRebase() : repo.pull());
@@ -845,7 +845,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) return;
         const absUri = vscode.Uri.file(path.join(repo.rootPath, msg.filePath));
-        await vscode.commands.executeCommand('gitcharm.showFileHistory', absUri);
+        await vscode.commands.executeCommand('gitsuite.showFileHistory', absUri);
         break;
       }
 
@@ -958,7 +958,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       }
 
       case 'COMMIT_SHOW_BRANCH_MENU': {
-        await vscode.commands.executeCommand('gitcharm.showBranchMenu', msg.repoId);
+        await vscode.commands.executeCommand('gitsuite.showBranchMenu', msg.repoId);
         break;
       }
 
@@ -972,19 +972,19 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       }
 
       case 'COMMIT_SELECT_AI_MODEL': {
-        await vscode.commands.executeCommand('gitcharm.selectAiModel');
+        await vscode.commands.executeCommand('gitsuite.selectAiModel');
         break;
       }
 
       case 'COMMIT_OPEN_AI_SETTINGS': {
-        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:rionoir.gitcharm gitcharm.ai');
+        await vscode.commands.executeCommand('workbench.action.openSettings', '@ext:jaypume.gitsuite gitsuite.ai');
         break;
       }
 
       case 'COMMIT_GENERATE_MESSAGE': {
         try {
           const ws = await this.manager.getAllStatuses();
-          const cfg = vscode.workspace.getConfiguration('gitcharm');
+          const cfg = vscode.workspace.getConfiguration('gitsuite');
           const maxDiffChars: number = cfg.get('ai.maxDiffChars', 8000);
           const multiRepo = ws.repos.length > 1;
 
@@ -1231,7 +1231,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
             `${fileName} (Working Tree ↔ ${msg.stashRef})`
           );
         } catch (e) {
-          vscode.window.showErrorMessage(`GitCharm: Cannot open stash diff — ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Cannot open stash diff — ${String(e)}`);
         }
         break;
       }
@@ -1392,7 +1392,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           this.logProvider?.refresh();
         } catch (e: unknown) {
           this.post({ type: 'PUSH_SQUASH_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Squash failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Squash failed: ${String(e)}`);
         }
         break;
       }
@@ -1413,7 +1413,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           this.logProvider?.refresh();
         } catch (e: unknown) {
           this.post({ type: 'PUSH_DROP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Drop failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Drop failed: ${String(e)}`);
         }
         break;
       }
@@ -1445,7 +1445,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
             if (choice === 'Continue') await repo.revertContinue();
             else await repo.revertAbort();
           } else {
-            vscode.window.showErrorMessage(`GitCharm: Revert failed: ${errMsg}`);
+            vscode.window.showErrorMessage(`Git Suite: Revert failed: ${errMsg}`);
           }
         }
         break;
@@ -1468,7 +1468,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           this.logProvider?.refresh();
         } catch (e: unknown) {
           this.post({ type: 'PUSH_EDIT_MSG_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Edit commit message failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Edit commit message failed: ${String(e)}`);
         }
         break;
       }
@@ -1753,7 +1753,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       }
 
       case 'COMMIT_MANAGE_REPO': {
-        await vscode.commands.executeCommand('gitcharm.showBranchMenu', msg.repoId);
+        await vscode.commands.executeCommand('gitsuite.showBranchMenu', msg.repoId);
         break;
       }
 
@@ -1803,7 +1803,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           return;
         }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: `GitCharm: Pushing submodule ${subRepoPush.rootPath.split('/').pop()}`, cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: `Git Suite: Pushing submodule ${subRepoPush.rootPath.split('/').pop()}`, cancellable: false },
           async () => {
             try {
               await subRepoPush.pushSubmodule();
@@ -1881,7 +1881,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           return;
         }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: `GitCharm: Updating submodule ${msg.submodulePath}`, cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: `Git Suite: Updating submodule ${msg.submodulePath}`, cancellable: false },
           async () => {
             try {
               await parentRepoU.updateSubmodule(msg.submodulePath, true, msg.recursive);
@@ -1958,7 +1958,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
 
         try {
           await vscode.window.withProgress(
-            { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Creating worktree…', cancellable: false },
+            { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Creating worktree…', cancellable: false },
             async () => {
               await repoCP.createWorktree(worktreePath.trim(), {
                 branch: picked.isNew ? undefined : picked.branchName,
@@ -1968,9 +1968,9 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
           );
           const repos = await this.manager.getAllWorktrees();
           this.post({ type: 'WORKTREE_LIST_RESULT', repos });
-          vscode.window.showInformationMessage(`GitCharm: Worktree created at ${worktreePath.trim()}`);
+          vscode.window.showInformationMessage(`Git Suite: Worktree created at ${worktreePath.trim()}`);
         } catch (e: unknown) {
-          vscode.window.showErrorMessage(`GitCharm: Failed to create worktree — ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Failed to create worktree — ${String(e)}`);
         }
         break;
       }
@@ -2083,12 +2083,12 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
       }
 
       case 'NOTIFY_ERROR': {
-        vscode.window.showErrorMessage(`GitCharm: ${msg.message}`);
+        vscode.window.showErrorMessage(`Git Suite: ${msg.message}`);
         break;
       }
 
       case 'NOTIFY_INFO': {
-        vscode.window.showInformationMessage(`GitCharm: ${msg.message}`);
+        vscode.window.showInformationMessage(`Git Suite: ${msg.message}`);
         break;
       }
 

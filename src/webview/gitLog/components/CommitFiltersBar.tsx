@@ -30,7 +30,7 @@ function useIsLightTheme() {
 export function CommitFiltersBar({ filters, branches, tags, repos, onFilterChange, onRepoChange, onClear, onFetchAll, onUndock, hideUndock }: Props) {
   const isLight = useIsLightTheme();
   useEffect(() => {
-    const id = 'gitcharm-filter-field-focus';
+    const id = 'gitsuite-filter-field-focus';
     if (document.getElementById(id)) return;
     const s = document.createElement('style');
     s.id = id;

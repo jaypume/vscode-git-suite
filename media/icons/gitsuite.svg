@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <!-- Deep purple-black squircle background -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a1033"/>
+      <stop offset="0.55" stop-color="#0f0a1e"/>
+      <stop offset="1" stop-color="#2d1b4e"/>
+    </linearGradient>
+    <!-- Brand purple highlight -->
+    <linearGradient id="branch" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c4b5fd"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="stack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+    <!-- Squircle clip -->
+    <clipPath id="squircle">
+      <path d="M128 16c-48 0-72 6-90 24S14 82 14 128s6 72 24 90 42 24 90 24 72-6 90-24 24-42 24-90-6-72-24-90-42-24-90-24z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background squircle -->
+  <g clip-path="url(#squircle)">
+    <rect width="256" height="256" fill="url(#bg)"/>
+    <!-- Subtle top glow -->
+    <ellipse cx="128" cy="40" rx="110" ry="60" fill="#7c3aed" opacity="0.18"/>
+  </g>
+
+  <!-- Suite stack (layered cards) — bottom, behind branch -->
+  <g opacity="0.55">
+    <rect x="58" y="150" width="140" height="20" rx="6" fill="url(#stack)"/>
+    <rect x="58" y="178" width="140" height="20" rx="6" fill="url(#stack)" opacity="0.6"/>
+  </g>
+
+  <!-- Git branch: Y-shape with 3 nodes -->
+  <g fill="none" stroke="url(#branch)" stroke-width="11" stroke-linecap="round">
+    <!-- vertical stem -->
+    <line x1="128" y1="98" x2="128" y2="158"/>
+    <!-- curved branch to right node -->
+    <path d="M128 98 Q128 70 168 70"/>
+  </g>
+
+  <!-- Nodes -->
+  <!-- top node (brand purple) -->
+  <circle cx="128" cy="98" r="15" fill="#a855f7"/>
+  <circle cx="128" cy="98" r="6" fill="#1a1033"/>
+  <!-- right node (brand purple) -->
+  <circle cx="172" cy="70" r="15" fill="#a855f7"/>
+  <circle cx="172" cy="70" r="6" fill="#1a1033"/>
+  <!-- bottom node — Git orange accent (commit HEAD) -->
+  <circle cx="128" cy="158" r="17" fill="#fc6d26"/>
+  <circle cx="128" cy="158" r="6.5" fill="#1a1033"/>
+</svg>

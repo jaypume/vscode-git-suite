@@ -13,7 +13,7 @@ export async function openCommitDetailPanel(
 ): Promise<void> {
   const repo = manager.getRepo(repoId);
   if (!repo) {
-    vscode.window.showErrorMessage('GitCharm: Repository not found.');
+    vscode.window.showErrorMessage('Git Suite: Repository not found.');
     return;
   }
 
@@ -33,7 +33,7 @@ export async function openCommitDetailPanel(
       repo.getBranchesContaining(hash).catch(() => ({ local: [], remote: [], tags: [] })),
     ]);
   } catch (e: unknown) {
-    vscode.window.showErrorMessage(`GitCharm: Failed to load commit details: ${String(e)}`);
+    vscode.window.showErrorMessage(`Git Suite: Failed to load commit details: ${String(e)}`);
     return;
   }
 
@@ -50,7 +50,7 @@ export async function openCommitDetailPanel(
   }
 
   const panel = vscode.window.createWebviewPanel(
-    'gitcharmCommitDetail',
+    'gitsuiteCommitDetail',
     `Commit ${commitInfo.shortHash}`,
     vscode.ViewColumn.One,
     {
@@ -89,8 +89,8 @@ export async function openCommitDetailPanel(
     files,
     branches,
     autoExplain: opts.autoExplain ?? false,
-    aiEnabled: vscode.workspace.getConfiguration('gitcharm').get('ai.enabled', true),
-    aiModelLabel: getAiModelLabel(vscode.workspace.getConfiguration('gitcharm')),
+    aiEnabled: vscode.workspace.getConfiguration('gitsuite').get('ai.enabled', true),
+    aiModelLabel: getAiModelLabel(vscode.workspace.getConfiguration('gitsuite')),
     iconIcons,
   });
 
@@ -105,7 +105,7 @@ export async function openCommitDetailPanel(
   panel.webview.onDidReceiveMessage(async (msg: { type: string; filePath?: string; fileStatus?: string; hash?: string; parents?: string[]; requestId?: string }) => {
     if (msg.type === 'explainCommit') {
       try {
-        const cfg = vscode.workspace.getConfiguration('gitcharm');
+        const cfg = vscode.workspace.getConfiguration('gitsuite');
         const maxDiffChars: number = cfg.get('ai.maxDiffChars', 8000);
         const configuredLang: string = cfg.get('ai.language', '');
         const language = configuredLang.trim() || vscode.env.language || 'en';
@@ -166,9 +166,9 @@ export async function openCommitDetailPanel(
       try {
         const { join } = await import('path');
         const absUri = vscode.Uri.file(join(repo.rootPath, msg.filePath));
-        await vscode.commands.executeCommand('gitcharm.showFileHistory', absUri);
+        await vscode.commands.executeCommand('gitsuite.showFileHistory', absUri);
       } catch (e: unknown) {
-        vscode.window.showErrorMessage(`GitCharm: Cannot open file history: ${String(e)}`);
+        vscode.window.showErrorMessage(`Git Suite: Cannot open file history: ${String(e)}`);
       }
       return;
     }
@@ -202,7 +202,7 @@ export async function openCommitDetailPanel(
         }
         await vscode.commands.executeCommand('vscode.diff', leftUri, rightUri, title, { preview: true });
       } catch (e: unknown) {
-        vscode.window.showErrorMessage(`GitCharm: Cannot open diff: ${String(e)}`);
+        vscode.window.showErrorMessage(`Git Suite: Cannot open diff: ${String(e)}`);
       }
     } else if (msg.type === 'openFile' && msg.filePath) {
       const fileUri = vscode.Uri.joinPath(vscode.Uri.file(repo.rootPath), msg.filePath);
@@ -245,10 +245,10 @@ export async function openCommitDetailPanel(
         } else {
           await repo.revertFileToParent(hash, msg.filePath);
         }
-        vscode.window.showInformationMessage(`GitCharm: Reverted "${msg.filePath}".`);
+        vscode.window.showInformationMessage(`Git Suite: Reverted "${msg.filePath}".`);
         panel.webview.postMessage({ type: 'revertDone', filePath: msg.filePath });
       } catch (e: unknown) {
-        vscode.window.showErrorMessage(`GitCharm: Revert failed: ${String(e)}`);
+        vscode.window.showErrorMessage(`Git Suite: Revert failed: ${String(e)}`);
       }
     }
   });
@@ -950,7 +950,7 @@ function getHtml(nonce: string, csp: string, codiconUri: string, data: PanelData
         listEl.innerHTML = buf.join('');
         btnExpandAll.style.display   = '';
         btnCollapseAll.style.display = '';
-        console.log('[GitCharm] render tree: html length=' + listEl.innerHTML.length);
+        console.log('[Git Suite] render tree: html length=' + listEl.innerHTML.length);
       }
     }
 
@@ -1260,10 +1260,10 @@ function getHtml(nonce: string, csp: string, codiconUri: string, data: PanelData
       Object.assign(ICONS, e.data.iconIcons);
       // Re-inject font face if needed
       if (ICONS.type === 'font' && ICONS.fontFaceUri && ICONS.fontId) {
-        const existing = document.getElementById('gitcharm-icon-font');
+        const existing = document.getElementById('gitsuite-icon-font');
         if (existing) existing.remove();
         const style = document.createElement('style');
-        style.id = 'gitcharm-icon-font';
+        style.id = 'gitsuite-icon-font';
         style.textContent = '@font-face { font-family: "' + ICONS.fontId + '"; src: url("' + ICONS.fontFaceUri + '") format("' + (ICONS.fontFormat || 'woff') + '"); font-weight: normal; font-style: normal; }';
         document.head.appendChild(style);
       }

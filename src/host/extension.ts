@@ -39,7 +39,7 @@ async function showViewModeQuickpick(globalState: vscode.Memento): Promise<void>
   ];
 
   const picked = await vscode.window.showQuickPick(items, {
-    title: 'GitCharm — Choose your preferred view mode',
+    title: 'Git Suite — Choose your preferred view mode',
     placeHolder: 'Select how changed files are displayed (you can change this later in Settings)',
     ignoreFocusOut: true,
   });
@@ -47,7 +47,7 @@ async function showViewModeQuickpick(globalState: vscode.Memento): Promise<void>
   await globalState.update(SHOWN_KEY, true);
 
   if (picked) {
-    await vscode.workspace.getConfiguration('gitcharm').update('changesViewMode', picked.value, vscode.ConfigurationTarget.Global);
+    await vscode.workspace.getConfiguration('gitsuite').update('changesViewMode', picked.value, vscode.ConfigurationTarget.Global);
   }
 }
 
@@ -64,7 +64,7 @@ async function maybeShowSupportNotification(globalState: vscode.Memento): Promis
   await globalState.update(LAST_SHOWN_KEY, Date.now());
 
   const picked = await vscode.window.showInformationMessage(
-    'Do you like GitCharm?',
+    'Do you like Git Suite?',
     'Leave a Star',
     'Donate',
     'Do Not Show Again',
@@ -73,14 +73,14 @@ async function maybeShowSupportNotification(globalState: vscode.Memento): Promis
   if (picked === 'Do Not Show Again') {
     await globalState.update(DO_NOT_SHOW_KEY, true);
   } else if (picked === 'Leave a Star') {
-    await vscode.env.openExternal(vscode.Uri.parse('https://github.com/RioNoir/gitcharm'));
+    await vscode.env.openExternal(vscode.Uri.parse('https://github.com/jaypume/vscode-git-suite'));
   } else if (picked === 'Donate') {
     await vscode.env.openExternal(vscode.Uri.parse('https://buymeacoffee.com/rionoir'));
   }
 }
 
 async function maybeNotifyUnpushedCommits(manager: WorkspaceGitManager, commitPanel: CommitPanelProvider): Promise<void> {
-  if (!vscode.workspace.getConfiguration('gitcharm').get<boolean>('notifyOnUnpushedCommits', true)) return;
+  if (!vscode.workspace.getConfiguration('gitsuite').get<boolean>('notifyOnUnpushedCommits', true)) return;
 
   const metas = manager.getRepoMetas();
   const countResults = await Promise.allSettled(
@@ -102,13 +102,13 @@ async function maybeNotifyUnpushedCommits(manager: WorkspaceGitManager, commitPa
   const commitWord = totalAhead === 1 ? 'commit' : 'commits';
   const repoWord = reposWithAhead === 1 ? 'repository' : 'repositories';
   const message = reposWithAhead === 1
-    ? `GitCharm: ${totalAhead} unpushed ${commitWord} ready to push.`
-    : `GitCharm: ${totalAhead} unpushed ${commitWord} across ${reposWithAhead} ${repoWord}.`;
+    ? `Git Suite: ${totalAhead} unpushed ${commitWord} ready to push.`
+    : `Git Suite: ${totalAhead} unpushed ${commitWord} across ${reposWithAhead} ${repoWord}.`;
 
   const picked = await vscode.window.showInformationMessage(message, 'Go to Push', 'Dismiss');
 
   if (picked === 'Go to Push') {
-    await vscode.commands.executeCommand('gitcharm.commitPanel.focus');
+    await vscode.commands.executeCommand('gitsuite.commitPanel.focus');
     commitPanel.switchToTab('push');
   }
 }
@@ -116,7 +116,7 @@ async function maybeNotifyUnpushedCommits(manager: WorkspaceGitManager, commitPa
 async function maybeNotifyIncomingCommits(manager: WorkspaceGitManager, globalState: vscode.Memento): Promise<void> {
   const DO_NOT_SHOW_KEY = 'doNotShowIncomingCommitsNotification';
   if (globalState.get<boolean>(DO_NOT_SHOW_KEY)) return;
-  if (!vscode.workspace.getConfiguration('gitcharm').get<boolean>('notifyOnIncomingCommits', true)) return;
+  if (!vscode.workspace.getConfiguration('gitsuite').get<boolean>('notifyOnIncomingCommits', true)) return;
 
   await manager.startupFetchPromise;
 
@@ -142,8 +142,8 @@ async function maybeNotifyIncomingCommits(manager: WorkspaceGitManager, globalSt
   const commitWord = totalBehind === 1 ? 'commit' : 'commits';
   const repoWord = reposWithBehind === 1 ? 'repository' : 'repositories';
   const message = reposWithBehind === 1
-    ? `GitCharm: ${totalBehind} incoming ${commitWord} available to pull.`
-    : `GitCharm: ${totalBehind} incoming ${commitWord} across ${reposWithBehind} ${repoWord}.`;
+    ? `Git Suite: ${totalBehind} incoming ${commitWord} available to pull.`
+    : `Git Suite: ${totalBehind} incoming ${commitWord} across ${reposWithBehind} ${repoWord}.`;
 
   const pull = 'Pull';
   const dismiss = 'Dismiss';
@@ -156,14 +156,14 @@ async function maybeNotifyIncomingCommits(manager: WorkspaceGitManager, globalSt
   } else if (picked === pull) {
     const metaById = new Map(metas.map(m => [m.id, m]));
     await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Pulling…', cancellable: false },
+      { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Pulling…', cancellable: false },
       async () => {
         const results = await manager.pullAll(false);
         const failed = results.filter(r => !r.ok);
         const ok = results.filter(r => r.ok);
         if (failed.length === 0) {
           vscode.window.showInformationMessage(
-            `GitCharm: ${ok.length} ${ok.length === 1 ? 'repository' : 'repositories'} updated.`
+            `Git Suite: ${ok.length} ${ok.length === 1 ? 'repository' : 'repositories'} updated.`
           );
         } else {
           const failedDesc = failed.map(r => {
@@ -171,7 +171,7 @@ async function maybeNotifyIncomingCommits(manager: WorkspaceGitManager, globalSt
             return `${name}: ${r.message}`;
           }).join('; ');
           vscode.window.showWarningMessage(
-            `GitCharm: ${ok.length} updated, ${failed.length} failed: ${failedDesc}`
+            `Git Suite: ${ok.length} updated, ${failed.length} failed: ${failedDesc}`
           );
         }
       }
@@ -200,7 +200,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const badge = new BadgeController();
   badge.startLoading();
 
-  const log = vscode.window.createOutputChannel('GitCharm Profiles');
+  const log = vscode.window.createOutputChannel('Git Suite Profiles');
   context.subscriptions.push(log);
 
   const profileService = new GitProfileService(context, log);
@@ -230,11 +230,11 @@ export function activate(context: vscode.ExtensionContext): void {
   logPanel.setUndockedPanel(undockedPanel);
 
   // Apply saved hidden repos to badge immediately (before webview opens)
-  const savedHidden = context.workspaceState.get<string[]>('gitcharm.hiddenRepoIds', []);
+  const savedHidden = context.workspaceState.get<string[]>('gitsuite.hiddenRepoIds', []);
   if (savedHidden.length > 0) badge.setHiddenRepoIds(savedHidden);
 
   const branchStatusBar = new BranchStatusBar(manager, () => {
-    vscode.commands.executeCommand('gitcharm.commitPanel.focus');
+    vscode.commands.executeCommand('gitsuite.commitPanel.focus');
   });
 
   commitPanel.setBranchStatusBar(branchStatusBar);
@@ -272,12 +272,12 @@ export function activate(context: vscode.ExtensionContext): void {
   registerCommands(context, commitPanel, logPanel, mergeEditor, branchStatusBar, annotationController, profileStatusBar, manager, context.extensionUri);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('gitcharm.undock', () => {
+    vscode.commands.registerCommand('gitsuite.undock', () => {
       logPanel.triggerUndockPick();
     }),
   );
 
-  if (vscode.workspace.getConfiguration('gitcharm').get<boolean>('resetViewLocationsOnStartup', false)) {
+  if (vscode.workspace.getConfiguration('gitsuite').get<boolean>('resetViewLocationsOnStartup', false)) {
     void vscode.commands.executeCommand('workbench.action.resetViewLocations')
       .then(() => commitPanel.refresh(), () => undefined);
   }

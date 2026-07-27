@@ -17,7 +17,7 @@ export async function generateWithAI(
 
     case 'claude-api': {
       const apiKey: string = cfg.get('ai.claudeApiKey', '');
-      if (!apiKey) throw new Error('Anthropic API key not set. Configure gitcharm.ai.claudeApiKey in settings.');
+      if (!apiKey) throw new Error('Anthropic API key not set. Configure gitsuite.ai.claudeApiKey in settings.');
       const model: string = cfg.get('ai.claudeModel', 'claude-sonnet-4-6');
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -41,7 +41,7 @@ export async function generateWithAI(
 
     case 'openai-api': {
       const apiKey: string = cfg.get('ai.openaiApiKey', '');
-      if (!apiKey) throw new Error('OpenAI API key not set. Configure gitcharm.ai.openaiApiKey in settings.');
+      if (!apiKey) throw new Error('OpenAI API key not set. Configure gitsuite.ai.openaiApiKey in settings.');
       const model: string = cfg.get('ai.openaiModel', 'gpt-4o');
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -69,7 +69,7 @@ export async function generateWithAI(
 
     case 'gemini-api': {
       const apiKey: string = cfg.get('ai.geminiApiKey', '');
-      if (!apiKey) throw new Error('Gemini API key not set. Configure gitcharm.ai.geminiApiKey in settings.');
+      if (!apiKey) throw new Error('Gemini API key not set. Configure gitsuite.ai.geminiApiKey in settings.');
       const model: string = cfg.get('ai.geminiModel', 'gemini-2.0-flash');
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model || 'gemini-2.0-flash'}:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -138,7 +138,7 @@ export async function generateWithAI(
         const all = await vscode.lm.selectChatModels();
         model = all[0];
       }
-      if (!model) throw new Error('No VS Code LM model available. Install GitHub Copilot or use the "GitCharm: Select AI Provider" command to switch provider.');
+      if (!model) throw new Error('No VS Code LM model available. Install GitHub Copilot or use the "Git Suite: Select AI Provider" command to switch provider.');
       const response = await model.sendRequest(
         [vscode.LanguageModelChatMessage.User(prompt)],
         {},

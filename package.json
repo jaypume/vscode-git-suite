@@ -1,13 +1,13 @@
 {
-  "name": "gitcharm",
-  "displayName": "GitCharm",
+  "name": "gitsuite",
+  "displayName": "Git Suite",
   "description": "JetBrains-like Git management for VS Code — Commit panel, Git Log with graph, multi-repo support and more.",
   "version": "0.4.0",
-  "publisher": "RioNoir",
+  "publisher": "jaypume",
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RioNoir/GitCharm.git"
+    "url": "https://github.com/jaypume/vscode-git-suite.git"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -25,7 +25,7 @@
     "intellij",
     "phpstorm"
   ],
-  "icon": "media/icons/gitcharm.png",
+  "icon": "media/icons/gitsuite.png",
   "galleryBanner": {
     "color": "#1e1e2e",
     "theme": "dark"
@@ -33,50 +33,50 @@
   "activationEvents": [
     "workspaceContains:**/.git",
     "onStartupFinished",
-    "onWebviewPanel:gitcharm.undocked"
+    "onWebviewPanel:gitsuite.undocked"
   ],
   "main": "./out/host/extension.js",
   "contributes": {
     "submenus": [
       {
-        "id": "gitcharm/explorer",
-        "label": "GitCharm"
+        "id": "gitsuite/explorer",
+        "label": "Git Suite"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "gitcharm-commit",
-          "title": "GitCharm Commit",
+          "id": "gitsuite-commit",
+          "title": "Git Suite Commit",
           "icon": "media/icons/git-commit.svg"
         }
       ],
       "panel": [
         {
-          "id": "gitcharm-log",
-          "title": "GitCharm Log",
+          "id": "gitsuite-log",
+          "title": "Git Suite Log",
           "icon": "media/icons/git-merge.svg"
         }
       ]
     },
     "views": {
-      "gitcharm-commit": [
+      "gitsuite-commit": [
         {
           "type": "webview",
-          "id": "gitcharm.commitPanel",
-          "name": "GitCharm Commit",
+          "id": "gitsuite.commitPanel",
+          "name": "Git Suite Commit",
           "retainContextWhenHidden": true
         },
         {
-          "id": "gitcharm.commitBadge",
+          "id": "gitsuite.commitBadge",
           "name": "",
           "when": "false"
         }
       ],
-      "gitcharm-log": [
+      "gitsuite-log": [
         {
           "type": "webview",
-          "id": "gitcharm.gitLog",
+          "id": "gitsuite.gitLog",
           "name": "Git Log",
           "retainContextWhenHidden": true
         }
@@ -84,426 +84,426 @@
     },
     "commands": [
       {
-        "command": "gitcharm.openLog",
+        "command": "gitsuite.openLog",
         "title": "Focus Git Log",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(history)"
       },
       {
-        "command": "gitcharm.commit",
+        "command": "gitsuite.commit",
         "title": "Commit",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.commitAndPush",
+        "command": "gitsuite.commitAndPush",
         "title": "Commit & Push",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.pull",
+        "command": "gitsuite.pull",
         "title": "Pull",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.push",
+        "command": "gitsuite.push",
         "title": "Push All",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(repo-push)"
       },
       {
-        "command": "gitcharm.fetchAll",
+        "command": "gitsuite.fetchAll",
         "title": "Fetch All Remotes",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(repo-fetch)"
       },
       {
-        "command": "gitcharm.syncAll",
+        "command": "gitsuite.syncAll",
         "title": "Sync All (Pull + Push)",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(sync)"
       },
       {
-        "command": "gitcharm.openMergeEditor",
+        "command": "gitsuite.openMergeEditor",
         "title": "Open Merge Editor",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.refreshCommitPanel",
+        "command": "gitsuite.refreshCommitPanel",
         "title": "Refresh Commit Panel",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(refresh)"
       },
       {
-        "command": "gitcharm.reloadRepositories",
+        "command": "gitsuite.reloadRepositories",
         "title": "Reload Repositories",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(sync)"
       },
       {
-        "command": "gitcharm.showBranchMenu",
+        "command": "gitsuite.showBranchMenu",
         "title": "Branch Menu",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(git-branch)"
       },
       {
-        "command": "gitcharm.updateProject",
+        "command": "gitsuite.updateProject",
         "title": "Pull All (Update Project)",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(repo-pull)"
       },
       {
-        "command": "gitcharm.openSettings",
+        "command": "gitsuite.openSettings",
         "title": "Settings",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(settings-gear)"
       },
       {
-        "command": "gitcharm.resetViewLocations",
+        "command": "gitsuite.resetViewLocations",
         "title": "Reset View Locations",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(discard)"
       },
       {
-        "command": "gitcharm.openGitAnnotations",
+        "command": "gitsuite.openGitAnnotations",
         "title": "Open Git Annotations",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(git-commit)"
       },
       {
-        "command": "gitcharm.closeGitAnnotations",
+        "command": "gitsuite.closeGitAnnotations",
         "title": "Close Git Annotations",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(git-commit)"
       },
       {
-        "command": "gitcharm.navigateToAnnotationCommit",
+        "command": "gitsuite.navigateToAnnotationCommit",
         "title": "Navigate to Commit",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.manageHiddenRepos",
+        "command": "gitsuite.manageHiddenRepos",
         "title": "Manage Hidden Repositories",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(eye-closed)"
       },
       {
-        "command": "gitcharm.manageProfiles",
+        "command": "gitsuite.manageProfiles",
         "title": "Manage Git Profiles",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(account)"
       },
       {
-        "command": "gitcharm.switchProfile",
+        "command": "gitsuite.switchProfile",
         "title": "Switch Git Profile",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(account)"
       },
       {
-        "command": "gitcharm.submodule.init",
+        "command": "gitsuite.submodule.init",
         "title": "Initialize Submodule",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.submodule.update",
+        "command": "gitsuite.submodule.update",
         "title": "Update Submodule",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.submodule.updateRecursive",
+        "command": "gitsuite.submodule.updateRecursive",
         "title": "Update Submodule (Recursive)",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.submodule.deinit",
+        "command": "gitsuite.submodule.deinit",
         "title": "Deinit Submodule",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.submodule.deinitForce",
+        "command": "gitsuite.submodule.deinitForce",
         "title": "Force Deinit Submodule",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.submodule.openInNewWindow",
+        "command": "gitsuite.submodule.openInNewWindow",
         "title": "Open Submodule in New Window",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.worktree.add",
+        "command": "gitsuite.worktree.add",
         "title": "Add Worktree",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.worktree.prune",
+        "command": "gitsuite.worktree.prune",
         "title": "Prune Worktrees",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.selectAiModel",
+        "command": "gitsuite.selectAiModel",
         "title": "Select AI Model",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.showBranchOptions",
+        "command": "gitsuite.showBranchOptions",
         "title": "Branch Options",
-        "category": "GitCharm"
+        "category": "Git Suite"
       },
       {
-        "command": "gitcharm.undock",
+        "command": "gitsuite.undock",
         "title": "Undock",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(multiple-windows)"
       },
       {
-        "command": "gitcharm.showFileHistory",
+        "command": "gitsuite.showFileHistory",
         "title": "Show File History",
-        "category": "GitCharm",
+        "category": "Git Suite",
         "icon": "$(history)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "gitcharm.fetchAll",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.fetchAll",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@1"
         },
         {
-          "command": "gitcharm.updateProject",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.updateProject",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@2"
         },
         {
-          "command": "gitcharm.push",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.push",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@3"
         },
         {
-          "command": "gitcharm.syncAll",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.syncAll",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@4"
         },
         {
-          "command": "gitcharm.showBranchMenu",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.showBranchMenu",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@5"
         },
         {
-          "command": "gitcharm.openLog",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.openLog",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@6"
         },
         {
-          "command": "gitcharm.openSettings",
-          "when": "view == gitcharm.commitPanel",
+          "command": "gitsuite.openSettings",
+          "when": "view == gitsuite.commitPanel",
           "group": "navigation@7"
         }
       ],
       "editor/title": [
         {
-          "command": "gitcharm.fetchAll",
-          "when": "activeWebviewPanelId == gitcharm.undocked",
+          "command": "gitsuite.fetchAll",
+          "when": "activeWebviewPanelId == gitsuite.undocked",
           "group": "navigation@1"
         },
         {
-          "command": "gitcharm.updateProject",
-          "when": "activeWebviewPanelId == gitcharm.undocked",
+          "command": "gitsuite.updateProject",
+          "when": "activeWebviewPanelId == gitsuite.undocked",
           "group": "navigation@2"
         },
         {
-          "command": "gitcharm.push",
-          "when": "activeWebviewPanelId == gitcharm.undocked",
+          "command": "gitsuite.push",
+          "when": "activeWebviewPanelId == gitsuite.undocked",
           "group": "navigation@3"
         },
         {
-          "command": "gitcharm.syncAll",
-          "when": "activeWebviewPanelId == gitcharm.undocked",
+          "command": "gitsuite.syncAll",
+          "when": "activeWebviewPanelId == gitsuite.undocked",
           "group": "navigation@4"
         },
         {
-          "command": "gitcharm.showBranchMenu",
-          "when": "activeWebviewPanelId == gitcharm.undocked",
+          "command": "gitsuite.showBranchMenu",
+          "when": "activeWebviewPanelId == gitsuite.undocked",
           "group": "navigation@5"
         },
         {
-          "command": "gitcharm.openSettings",
-          "when": "activeWebviewPanelId == gitcharm.undocked",
+          "command": "gitsuite.openSettings",
+          "when": "activeWebviewPanelId == gitsuite.undocked",
           "group": "navigation@6"
         }
       ],
       "scm/sourceControl": [
         {
-          "command": "gitcharm.manageHiddenRepos",
-          "group": "gitcharm@1"
+          "command": "gitsuite.manageHiddenRepos",
+          "group": "gitsuite@1"
         }
       ],
       "commandPalette": [
         {
-          "command": "gitcharm.openLog"
+          "command": "gitsuite.openLog"
         },
         {
-          "command": "gitcharm.showBranchMenu"
+          "command": "gitsuite.showBranchMenu"
         },
         {
-          "command": "gitcharm.commit"
+          "command": "gitsuite.commit"
         },
         {
-          "command": "gitcharm.fetchAll"
+          "command": "gitsuite.fetchAll"
         },
         {
-          "command": "gitcharm.updateProject"
+          "command": "gitsuite.updateProject"
         },
         {
-          "command": "gitcharm.push"
+          "command": "gitsuite.push"
         },
         {
-          "command": "gitcharm.syncAll"
+          "command": "gitsuite.syncAll"
         },
         {
-          "command": "gitcharm.refreshCommitPanel"
+          "command": "gitsuite.refreshCommitPanel"
         },
         {
-          "command": "gitcharm.reloadRepositories"
+          "command": "gitsuite.reloadRepositories"
         },
         {
-          "command": "gitcharm.openMergeEditor"
+          "command": "gitsuite.openMergeEditor"
         },
         {
-          "command": "gitcharm.manageHiddenRepos"
+          "command": "gitsuite.manageHiddenRepos"
         },
         {
-          "command": "gitcharm.manageProfiles"
+          "command": "gitsuite.manageProfiles"
         },
         {
-          "command": "gitcharm.switchProfile"
+          "command": "gitsuite.switchProfile"
         },
         {
-          "command": "gitcharm.selectAiModel"
+          "command": "gitsuite.selectAiModel"
         },
         {
-          "command": "gitcharm.undock"
+          "command": "gitsuite.undock"
         },
         {
-          "command": "gitcharm.submodule.init"
+          "command": "gitsuite.submodule.init"
         },
         {
-          "command": "gitcharm.submodule.update"
+          "command": "gitsuite.submodule.update"
         },
         {
-          "command": "gitcharm.submodule.updateRecursive"
+          "command": "gitsuite.submodule.updateRecursive"
         },
         {
-          "command": "gitcharm.submodule.deinit"
+          "command": "gitsuite.submodule.deinit"
         },
         {
-          "command": "gitcharm.submodule.deinitForce"
+          "command": "gitsuite.submodule.deinitForce"
         },
         {
-          "command": "gitcharm.submodule.openInNewWindow"
+          "command": "gitsuite.submodule.openInNewWindow"
         },
         {
-          "command": "gitcharm.worktree.add"
+          "command": "gitsuite.worktree.add"
         },
         {
-          "command": "gitcharm.worktree.prune"
+          "command": "gitsuite.worktree.prune"
         },
         {
-          "command": "gitcharm.openGitAnnotations",
-          "when": "resourceScheme == file && config.gitcharm.gitAnnotations.enabled"
+          "command": "gitsuite.openGitAnnotations",
+          "when": "resourceScheme == file && config.gitsuite.gitAnnotations.enabled"
         },
         {
-          "command": "gitcharm.closeGitAnnotations",
-          "when": "resourceScheme == file && gitcharm.annotationsVisible"
+          "command": "gitsuite.closeGitAnnotations",
+          "when": "resourceScheme == file && gitsuite.annotationsVisible"
         },
         {
-          "command": "gitcharm.navigateToAnnotationCommit",
+          "command": "gitsuite.navigateToAnnotationCommit",
           "when": "false"
         },
         {
-          "command": "gitcharm.showFileHistory",
+          "command": "gitsuite.showFileHistory",
           "when": "resourceScheme == file"
         },
         {
-          "command": "gitcharm.commitAndPush",
+          "command": "gitsuite.commitAndPush",
           "when": "false"
         },
         {
-          "command": "gitcharm.pull",
+          "command": "gitsuite.pull",
           "when": "false"
         },
         {
-          "command": "gitcharm.openSettings",
+          "command": "gitsuite.openSettings",
           "when": "false"
         },
         {
-          "command": "gitcharm.showBranchOptions",
+          "command": "gitsuite.showBranchOptions",
           "when": "false"
         }
       ],
       "editor/lineNumber/context": [
         {
-          "command": "gitcharm.openGitAnnotations",
-          "when": "resourceScheme == file && config.gitcharm.gitAnnotations.enabled && !gitcharm.annotationsVisible",
-          "group": "gitcharm@1"
+          "command": "gitsuite.openGitAnnotations",
+          "when": "resourceScheme == file && config.gitsuite.gitAnnotations.enabled && !gitsuite.annotationsVisible",
+          "group": "gitsuite@1"
         },
         {
-          "command": "gitcharm.closeGitAnnotations",
-          "when": "resourceScheme == file && gitcharm.annotationsVisible",
-          "group": "gitcharm@1"
+          "command": "gitsuite.closeGitAnnotations",
+          "when": "resourceScheme == file && gitsuite.annotationsVisible",
+          "group": "gitsuite@1"
         }
       ],
       "explorer/context": [
         {
-          "submenu": "gitcharm/explorer",
+          "submenu": "gitsuite/explorer",
           "when": "resourceScheme == file && !explorerResourceIsFolder",
-          "group": "gitcharm@1"
+          "group": "gitsuite@1"
         }
       ],
-      "gitcharm/explorer": [
+      "gitsuite/explorer": [
         {
-          "command": "gitcharm.showFileHistory",
+          "command": "gitsuite.showFileHistory",
           "when": "resourceScheme == file && !explorerResourceIsFolder",
           "group": "navigation@1"
         }
       ],
       "editor/context": [
         {
-          "command": "gitcharm.showFileHistory",
+          "command": "gitsuite.showFileHistory",
           "when": "resourceScheme == file",
-          "group": "gitcharm@1"
+          "group": "gitsuite@1"
         },
         {
-          "command": "gitcharm.openMergeEditor",
+          "command": "gitsuite.openMergeEditor",
           "when": "resourceScheme == file",
-          "group": "gitcharm@2"
+          "group": "gitsuite@2"
         },
         {
-          "command": "gitcharm.openGitAnnotations",
-          "when": "resourceScheme == file && config.gitcharm.gitAnnotations.enabled && !gitcharm.annotationsVisible",
-          "group": "gitcharm@3"
+          "command": "gitsuite.openGitAnnotations",
+          "when": "resourceScheme == file && config.gitsuite.gitAnnotations.enabled && !gitsuite.annotationsVisible",
+          "group": "gitsuite@3"
         },
         {
-          "command": "gitcharm.closeGitAnnotations",
-          "when": "resourceScheme == file && gitcharm.annotationsVisible",
-          "group": "gitcharm@3"
+          "command": "gitsuite.closeGitAnnotations",
+          "when": "resourceScheme == file && gitsuite.annotationsVisible",
+          "group": "gitsuite@3"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "gitcharm.openLog",
+        "command": "gitsuite.openLog",
         "key": "ctrl+alt+l",
         "mac": "cmd+alt+l"
       },
       {
-        "command": "gitcharm.commit",
+        "command": "gitsuite.commit",
         "key": "ctrl+alt+k",
         "mac": "cmd+alt+k"
       }
     ],
     "colors": [
       {
-        "id": "gitcharm.statusBarPullForeground",
+        "id": "gitsuite.statusBarPullForeground",
         "description": "Status bar text color when incoming commits are available (pull needed)",
         "defaults": {
           "dark": "#64b5f6",
@@ -513,7 +513,7 @@
         }
       },
       {
-        "id": "gitcharm.statusBarPushForeground",
+        "id": "gitsuite.statusBarPushForeground",
         "description": "Status bar text color when there are unpushed commits or the branch is not on remote",
         "defaults": {
           "dark": "#ce93d8",
@@ -523,7 +523,7 @@
         }
       },
       {
-        "id": "gitcharm.statusBarDirtyForeground",
+        "id": "gitsuite.statusBarDirtyForeground",
         "description": "Status bar text color when there are uncommitted changes",
         "defaults": {
           "dark": "#81c784",
@@ -537,7 +537,7 @@
       {
         "title": "Basic Settings",
         "properties": {
-          "gitcharm.graphMaxCommits": {
+          "gitsuite.graphMaxCommits": {
             "order": 80,
             "type": "number",
             "default": 1000,
@@ -545,7 +545,7 @@
             "maximum": 10000,
             "description": "Maximum commits to load in the Git Log graph"
           },
-          "gitcharm.repositoryScanMaxDepth": {
+          "gitsuite.repositoryScanMaxDepth": {
             "order": 60,
             "type": "number",
             "default": 1,
@@ -553,7 +553,7 @@
             "maximum": 10,
             "description": "Maximum depth of workspace subfolders to scan for Git repositories (0 = only workspace folders)."
           },
-          "gitcharm.repositoryScanIgnoredFolders": {
+          "gitsuite.repositoryScanIgnoredFolders": {
             "order": 70,
             "type": "array",
             "default": [
@@ -564,50 +564,50 @@
             },
             "description": "Folder names or workspace-relative paths to skip while scanning for nested Git repositories."
           },
-          "gitcharm.fetchOnStartup": {
+          "gitsuite.fetchOnStartup": {
             "order": 40,
             "type": "boolean",
             "default": true,
             "description": "Automatically fetch all remotes when the extension activates"
           },
-          "gitcharm.notifyOnIncomingCommits": {
+          "gitsuite.notifyOnIncomingCommits": {
             "order": 50,
             "type": "boolean",
             "default": true,
             "description": "Show a notification on startup when there are incoming commits available to pull"
           },
-          "gitcharm.notifyOnUnpushedCommits": {
+          "gitsuite.notifyOnUnpushedCommits": {
             "order": 55,
             "type": "boolean",
             "default": true,
             "description": "Show a notification on startup when there are unpushed commits ready to push"
           },
-          "gitcharm.projectColors": {
+          "gitsuite.projectColors": {
             "order": 110,
             "type": "object",
             "default": {},
             "description": "Map of workspace folder/repository name to hex color for the commit graph (e.g. {\"my-repo\": \"#ff6b6b\"})"
           },
-          "gitcharm.autoRefreshInterval": {
+          "gitsuite.autoRefreshInterval": {
             "order": 30,
             "type": "number",
             "default": 0,
             "minimum": 0,
             "description": "Auto-refresh interval in seconds (0 = disabled, use file watchers only)"
           },
-          "gitcharm.gitAnnotations.enabled": {
+          "gitsuite.gitAnnotations.enabled": {
             "order": 90,
             "type": "boolean",
             "default": true,
             "description": "Enable Git Annotations in the editor."
           },
-          "gitcharm.gitGhostText.enabled": {
+          "gitsuite.gitGhostText.enabled": {
             "order": 100,
             "type": "boolean",
             "default": true,
             "description": "Enable inline Git ghost text in the editor."
           },
-          "gitcharm.changesViewMode": {
+          "gitsuite.changesViewMode": {
             "order": 10,
             "type": "string",
             "enum": [
@@ -623,13 +623,13 @@
             "default": "simplified",
             "description": "How to display changed files in the Changes tab."
           },
-          "gitcharm.promptAddUntrackedToGit": {
+          "gitsuite.promptAddUntrackedToGit": {
             "order": 25,
             "type": "boolean",
             "default": true,
             "description": "Show a prompt when new untracked files are detected, offering to add them to Git."
           },
-          "gitcharm.defaultCommitAction": {
+          "gitsuite.defaultCommitAction": {
             "order": 20,
             "type": "string",
             "enum": [
@@ -643,7 +643,7 @@
             "default": "commit",
             "description": "Default action for the commit button in the Commit Panel."
           },
-          "gitcharm.defaultSaveAction": {
+          "gitsuite.defaultSaveAction": {
             "order": 21,
             "type": "string",
             "enum": [
@@ -657,7 +657,7 @@
             "default": "stash",
             "description": "Default action for the Save button in the Commit Panel."
           },
-          "gitcharm.suppressDivergedBranchWarning": {
+          "gitsuite.suppressDivergedBranchWarning": {
             "order": 35,
             "type": "boolean",
             "default": false,
@@ -668,19 +668,19 @@
       {
         "title": "AI Settings",
         "properties": {
-          "gitcharm.ai.enabled": {
+          "gitsuite.ai.enabled": {
             "order": 0,
             "type": "boolean",
             "default": true,
-            "description": "Enable AI features in GitCharm (commit message generation, commit explanation). When disabled, all AI actions are hidden."
+            "description": "Enable AI features in Git Suite (commit message generation, commit explanation). When disabled, all AI actions are hidden."
           },
-          "gitcharm.ai.language": {
+          "gitsuite.ai.language": {
             "order": 1,
             "type": "string",
             "default": "",
             "markdownDescription": "Language for AI-generated text (e.g. `en`, `it`, `fr`, `de`). Leave empty to use the VS Code display language."
           },
-          "gitcharm.ai.provider": {
+          "gitsuite.ai.provider": {
             "order": 2,
             "type": "string",
             "enum": [
@@ -708,97 +708,97 @@
             "default": "vscode-lm",
             "description": "AI provider to use for all AI features."
           },
-          "gitcharm.ai.modelId": {
+          "gitsuite.ai.modelId": {
             "order": 2,
             "type": "string",
             "default": "",
-            "description": "VS Code LM model ID (e.g. 'copilot:gpt-4o'). Only used when provider is 'vscode-lm'. Leave empty to auto-select. Use the 'GitCharm: Select AI Model' command to pick interactively."
+            "description": "VS Code LM model ID (e.g. 'copilot:gpt-4o'). Only used when provider is 'vscode-lm'. Leave empty to auto-select. Use the 'Git Suite: Select AI Model' command to pick interactively."
           },
-          "gitcharm.ai.claudeApiKey": {
+          "gitsuite.ai.claudeApiKey": {
             "order": 3,
             "type": "string",
             "default": "",
             "description": "Anthropic API key. Only used when provider is 'claude-api'. Get your key at console.anthropic.com."
           },
-          "gitcharm.ai.claudeModel": {
+          "gitsuite.ai.claudeModel": {
             "order": 4,
             "type": "string",
             "default": "",
-            "description": "Claude model ID (e.g. 'claude-opus-4-7', 'claude-sonnet-4-6'). Used when provider is 'claude-api' or 'claude-cli'. Leave empty to use the default. Use the 'GitCharm: Select AI Model' command to pick interactively."
+            "description": "Claude model ID (e.g. 'claude-opus-4-7', 'claude-sonnet-4-6'). Used when provider is 'claude-api' or 'claude-cli'. Leave empty to use the default. Use the 'Git Suite: Select AI Model' command to pick interactively."
           },
-          "gitcharm.ai.claudePath": {
+          "gitsuite.ai.claudePath": {
             "order": 5,
             "type": "string",
             "default": "claude",
             "description": "Path to the Claude CLI binary. Only used when provider is 'claude-cli'. Defaults to 'claude' (must be on PATH)."
           },
-          "gitcharm.ai.openaiApiKey": {
+          "gitsuite.ai.openaiApiKey": {
             "order": 6,
             "type": "string",
             "default": "",
             "description": "OpenAI API key. Only used when provider is 'openai-api'. Get your key at platform.openai.com."
           },
-          "gitcharm.ai.openaiModel": {
+          "gitsuite.ai.openaiModel": {
             "order": 7,
             "type": "string",
             "default": "gpt-4o",
             "description": "OpenAI model ID (e.g. 'gpt-4o', 'gpt-4o-mini', 'o3'). Only used when provider is 'openai-api'."
           },
-          "gitcharm.ai.geminiApiKey": {
+          "gitsuite.ai.geminiApiKey": {
             "order": 8,
             "type": "string",
             "default": "",
             "description": "Google Gemini API key. Only used when provider is 'gemini-api'. Get your key at aistudio.google.com."
           },
-          "gitcharm.ai.geminiModel": {
+          "gitsuite.ai.geminiModel": {
             "order": 9,
             "type": "string",
             "default": "gemini-2.0-flash",
             "description": "Gemini model ID (e.g. 'gemini-2.0-flash', 'gemini-2.5-pro'). Used when provider is 'gemini-api' or 'gemini-cli'."
           },
-          "gitcharm.ai.geminiPath": {
+          "gitsuite.ai.geminiPath": {
             "order": 10,
             "type": "string",
             "default": "gemini",
             "description": "Path to the Gemini CLI binary. Only used when provider is 'gemini-cli'. Defaults to 'gemini' (must be on PATH)."
           },
-          "gitcharm.ai.codexModel": {
+          "gitsuite.ai.codexModel": {
             "order": 11,
             "type": "string",
             "default": "",
-            "description": "Codex model ID to use (e.g. 'o3', 'o4-mini'). Only used when provider is 'codex-cli'. Leave empty to use the CLI default. Use the 'GitCharm: Select AI Model' command to pick interactively."
+            "description": "Codex model ID to use (e.g. 'o3', 'o4-mini'). Only used when provider is 'codex-cli'. Leave empty to use the CLI default. Use the 'Git Suite: Select AI Model' command to pick interactively."
           },
-          "gitcharm.ai.codexPath": {
+          "gitsuite.ai.codexPath": {
             "order": 9,
             "type": "string",
             "default": "codex",
             "description": "Path to the Codex CLI binary. Only used when provider is 'codex-cli'. Defaults to 'codex' (must be on PATH)."
           },
-          "gitcharm.ai.lmStudioModel": {
+          "gitsuite.ai.lmStudioModel": {
             "order": 7,
             "type": "string",
             "default": "",
-            "description": "LM Studio model identifier. Only used when provider is 'lmstudio'. Leave empty to use the currently loaded model. Use the 'GitCharm: Select AI Model' command to pick interactively."
+            "description": "LM Studio model identifier. Only used when provider is 'lmstudio'. Leave empty to use the currently loaded model. Use the 'Git Suite: Select AI Model' command to pick interactively."
           },
-          "gitcharm.ai.lmStudioUrl": {
+          "gitsuite.ai.lmStudioUrl": {
             "order": 8,
             "type": "string",
             "default": "http://localhost:1234",
             "description": "Base URL of the LM Studio local server. Only used when provider is 'lmstudio'."
           },
-          "gitcharm.ai.ollamaModel": {
+          "gitsuite.ai.ollamaModel": {
             "order": 11,
             "type": "string",
             "default": "llama3",
             "description": "Ollama model name (e.g. 'llama3', 'mistral', 'qwen3.5:9b'). Only used when provider is 'ollama'."
           },
-          "gitcharm.ai.ollamaUrl": {
+          "gitsuite.ai.ollamaUrl": {
             "order": 12,
             "type": "string",
             "default": "http://localhost:11434",
             "description": "Base URL of the Ollama API. Only used when provider is 'ollama'."
           },
-          "gitcharm.ai.maxDiffChars": {
+          "gitsuite.ai.maxDiffChars": {
             "order": 13,
             "type": "number",
             "default": 8000,
@@ -811,11 +811,11 @@
       {
         "title": "Experimental",
         "properties": {
-          "gitcharm.resetViewLocationsOnStartup": {
+          "gitsuite.resetViewLocationsOnStartup": {
             "order": 1,
             "type": "boolean",
             "default": false,
-            "description": "Run VS Code's 'Reset View Locations' action on startup. Useful to clear stale GitCharm badge placement, but it resets view positions globally."
+            "description": "Run VS Code's 'Reset View Locations' action on startup. Useful to clear stale Git Suite badge placement, but it resets view positions globally."
           }
         }
       }

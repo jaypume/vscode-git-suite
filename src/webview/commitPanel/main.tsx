@@ -328,7 +328,7 @@ function App() {
 
   // ── Inject tab label animation keyframes once ─────────────────────────────
   useEffect(() => {
-    const id = 'gitcharm-tab-kf';
+    const id = 'gitsuite-tab-kf';
     if (document.getElementById(id)) return;
     const s = document.createElement('style');
     s.id = id;
@@ -342,7 +342,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const id = 'gitcharm-action-btn-hover';
+    const id = 'gitsuite-action-btn-hover';
     if (document.getElementById(id)) return;
     const s = document.createElement('style');
     s.id = id;

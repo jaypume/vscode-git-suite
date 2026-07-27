@@ -15,7 +15,7 @@ export interface EffectiveProfile {
   source: 'active' | 'local' | 'global';
 }
 
-const PROFILES_KEY = 'gitcharm.gitProfiles';
+const PROFILES_KEY = 'gitsuite.gitProfiles';
 const ACTIVE_KEY = 'activeProfileId';
 
 export const LOCAL_PROFILE_ID = '__local__';
@@ -179,7 +179,7 @@ export class GitProfileService implements vscode.Disposable {
     // Migrate legacy profiles from vscode configuration into globalState (runs once)
     if (!hasProfiles) {
       const cfg = vscode.workspace.getConfiguration();
-      const fromNew = cfg.get<GitProfile[]>('gitcharm.gitProfiles');
+      const fromNew = cfg.get<GitProfile[]>('gitsuite.gitProfiles');
       const fromOld = cfg.get<GitProfile[]>('gitstorm.gitProfiles');
       const profiles = (fromNew?.length ? fromNew : fromOld?.length ? fromOld : [])
         .filter(p => p.id !== LOCAL_PROFILE_ID && p.id !== GLOBAL_PROFILE_ID);
@@ -189,7 +189,7 @@ export class GitProfileService implements vscode.Disposable {
       }
 
       if (!hasActive) {
-        const activeNew = cfg.get<string>('gitcharm.activeGitProfileId', '');
+        const activeNew = cfg.get<string>('gitsuite.activeGitProfileId', '');
         const activeOld = cfg.get<string>('gitstorm.activeGitProfileId', '');
         const migratedId = activeNew || activeOld;
         if (migratedId && profiles.find(p => p.id === migratedId)) {
@@ -210,9 +210,9 @@ export class GitProfileService implements vscode.Disposable {
   private async cleanLegacyConfigKeys(): Promise<void> {
     const cfg = vscode.workspace.getConfiguration();
     const legacyKeys = [
-      'gitcharm.activeGitProfileId',
+      'gitsuite.activeGitProfileId',
       'gitstorm.activeGitProfileId',
-      'gitcharm.gitProfiles',
+      'gitsuite.gitProfiles',
       'gitstorm.gitProfiles',
     ];
     for (const key of legacyKeys) {

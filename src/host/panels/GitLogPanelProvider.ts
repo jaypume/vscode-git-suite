@@ -46,7 +46,7 @@ async function deleteTagWithRemoteOption(
   if (choice === 'remote') {
     // Remote only — don't delete locally
     if (remotes.length === 0) {
-      vscode.window.showWarningMessage(`GitCharm: No remotes configured.`);
+      vscode.window.showWarningMessage(`Git Suite: No remotes configured.`);
       return;
     }
     const remote = remotes.length === 1
@@ -59,7 +59,7 @@ async function deleteTagWithRemoteOption(
   // 'both': delete local first, then remote
   await repo.deleteTag(tagName);
   if (remotes.length === 0) {
-    vscode.window.showWarningMessage(`GitCharm: Tag "${tagName}" deleted locally, but no remotes configured.`);
+    vscode.window.showWarningMessage(`Git Suite: Tag "${tagName}" deleted locally, but no remotes configured.`);
     return;
   }
   const remote = remotes.length === 1
@@ -71,7 +71,7 @@ async function deleteTagWithRemoteOption(
 
 
 export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.Disposable {
-  public static readonly viewType = 'gitcharm.gitLog';
+  public static readonly viewType = 'gitsuite.gitLog';
 
   private view?: vscode.WebviewView;
   private disposables: vscode.Disposable[] = [];
@@ -105,7 +105,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         { label: '$(editor-layout) Undock in Editor Tab (Only Log)', value: 'editorTab', showCommit: false },
         { label: '$(empty-window) Undock in New Window (Only Log)', value: 'newWindow', showCommit: false },
       ],
-      { title: 'GitCharm: Undock', placeHolder: 'Choose where to open the panel' },
+      { title: 'Git Suite: Undock', placeHolder: 'Choose where to open the panel' },
     );
     if (!pick) return;
     this.undockedPanel.open(pick.value, pick.showCommit);
@@ -165,7 +165,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
       webviewView.webview,
       this.extensionUri,
       'gitLog',
-      'GitCharm: Git Log'
+      'Git Suite: Git Log'
     );
 
     webviewView.webview.onDidReceiveMessage(
@@ -271,7 +271,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     if (msg.type === 'LOG_INIT_DATA') {
       const m = msg as typeof msg & { hasWorkspaceFolder?: boolean; aiEnabled?: boolean };
       if (m.hasWorkspaceFolder === undefined) m.hasWorkspaceFolder = (vscode.workspace.workspaceFolders?.length ?? 0) > 0;
-      if (m.aiEnabled === undefined) m.aiEnabled = vscode.workspace.getConfiguration('gitcharm').get<boolean>('ai.enabled', true);
+      if (m.aiEnabled === undefined) m.aiEnabled = vscode.workspace.getConfiguration('gitsuite').get<boolean>('ai.enabled', true);
     }
     if (this.activeReplyTarget === 'undocked') {
       this.undockedPanel?.postToLog(msg);
@@ -285,7 +285,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     if (msg.type === 'LOG_INIT_DATA') {
       const m = msg as typeof msg & { hasWorkspaceFolder?: boolean; aiEnabled?: boolean };
       if (m.hasWorkspaceFolder === undefined) m.hasWorkspaceFolder = (vscode.workspace.workspaceFolders?.length ?? 0) > 0;
-      if (m.aiEnabled === undefined) m.aiEnabled = vscode.workspace.getConfiguration('gitcharm').get<boolean>('ai.enabled', true);
+      if (m.aiEnabled === undefined) m.aiEnabled = vscode.workspace.getConfiguration('gitsuite').get<boolean>('ai.enabled', true);
     }
     this.view?.webview.postMessage(msg);
     this.undockedPanel?.postToLog(msg);
@@ -316,7 +316,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
   private async handleMessage(msg: LogToHostMsg): Promise<void> {
     switch (msg.type) {
       case 'LOG_REQUEST_COMMITS': {
-        const maxCommits = vscode.workspace.getConfiguration('gitcharm').get<number>('graphMaxCommits', 1000);
+        const maxCommits = vscode.workspace.getConfiguration('gitsuite').get<number>('graphMaxCommits', 1000);
         const limit = Math.min(msg.limit, maxCommits);
 
         const repos = this.getVisibleRepos();
@@ -423,7 +423,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         try {
           await openSmartDiff(repo, msg);
         } catch (e: unknown) {
-          vscode.window.showErrorMessage(`GitCharm: Cannot open diff: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Cannot open diff: ${String(e)}`);
         }
         break;
       }
@@ -435,7 +435,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           const uri = vscode.Uri.file(path.join(repo.rootPath, msg.filePath));
           await vscode.commands.executeCommand('vscode.open', uri);
         } catch (e: unknown) {
-          vscode.window.showErrorMessage(`GitCharm: Cannot open file: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Cannot open file: ${String(e)}`);
         }
         break;
       }
@@ -457,7 +457,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
       case 'LOG_SHOW_FILE_HISTORY': {
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) return;
-        await vscode.commands.executeCommand('gitcharm.showFileHistory', vscode.Uri.file(path.join(repo.rootPath, msg.filePath)));
+        await vscode.commands.executeCommand('gitsuite.showFileHistory', vscode.Uri.file(path.join(repo.rootPath, msg.filePath)));
         break;
       }
 
@@ -492,7 +492,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_FILE_OP_RESULT', requestId: msg.requestId, ok: true });
         } catch (e: unknown) {
           this.post({ type: 'LOG_FILE_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Cannot revert file: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Cannot revert file: ${String(e)}`);
         }
         break;
       }
@@ -518,7 +518,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) { this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Repo not found' }); return; }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Pulling', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Pulling', cancellable: false },
           async () => {
             try {
               const output = await repo.pull();
@@ -536,7 +536,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) { this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Repo not found' }); return; }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Pushing', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Pushing', cancellable: false },
           async () => {
             try {
               await repo.push(msg.force, msg.remote);
@@ -581,7 +581,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
                 { label: '$(close) Cancel', detail: '', value: 'cancel' },
               ],
               {
-                title: `GitCharm [${repoName}]: Uncommitted changes`,
+                title: `Git Suite [${repoName}]: Uncommitted changes`,
                 placeHolder: `Local changes would be overwritten by merging "${msg.from}"`,
                 ignoreFocusOut: true,
               }
@@ -604,10 +604,10 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
               this.commitPanel?.prefillCommitMessage(mergeMsg);
             }).catch(() => {});
             vscode.window.showWarningMessage(
-              'GitCharm: Merge conflicts detected. Use the Merge Editor to resolve them.',
+              'Git Suite: Merge conflicts detected. Use the Merge Editor to resolve them.',
               'Open Commit Panel'
             ).then(choice => {
-              if (choice) vscode.commands.executeCommand('gitcharm.commitPanel.focus');
+              if (choice) vscode.commands.executeCommand('gitsuite.commitPanel.focus');
             });
           }
         }
@@ -664,7 +664,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           return !checkedOutIn.includes(meta?.name ?? id);
         });
         if (eligibleRepoIds.length === 0) {
-          vscode.window.showWarningMessage(`GitCharm: Cannot delete "${msg.branchName}" — it is currently checked out in all target repositories.`);
+          vscode.window.showWarningMessage(`Git Suite: Cannot delete "${msg.branchName}" — it is currently checked out in all target repositories.`);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Checked out' });
           return;
         }
@@ -695,7 +695,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           }
         }
         if (errors.length > 0) {
-          vscode.window.showWarningMessage(`GitCharm: ${errors.length} error(s): ${errors.join('; ')}`);
+          vscode.window.showWarningMessage(`Git Suite: ${errors.length} error(s): ${errors.join('; ')}`);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: errors.join('; ') });
         } else {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
@@ -706,7 +706,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
 
       case 'LOG_FETCH_ALL': {
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: 'GitCharm: Fetching all', cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: 'Git Suite: Fetching all', cancellable: false },
           async () => { await this.manager.fetchAll(); }
         );
         const branches = await this.getFilteredBranches();
@@ -752,7 +752,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
               await repo.cherryPickAbort();
             }
           } else {
-            vscode.window.showErrorMessage(`GitCharm: Cherry-pick failed: ${errMsg}`);
+            vscode.window.showErrorMessage(`Git Suite: Cherry-pick failed: ${errMsg}`);
           }
         }
         break;
@@ -788,7 +788,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
               await repo.revertAbort();
             }
           } else {
-            vscode.window.showErrorMessage(`GitCharm: Revert failed: ${errMsg}`);
+            vscode.window.showErrorMessage(`Git Suite: Revert failed: ${errMsg}`);
           }
         }
         break;
@@ -811,7 +811,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Reset failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Reset failed: ${String(e)}`);
         }
         break;
       }
@@ -832,7 +832,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Create patch failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Create patch failed: ${String(e)}`);
         }
         break;
       }
@@ -856,7 +856,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
             else if (choice === 'Skip') await repo.cherryPickSkip();
             else await repo.cherryPickAbort();
           } else {
-            vscode.window.showErrorMessage(`GitCharm: Cherry-pick failed: ${errMsg}`);
+            vscode.window.showErrorMessage(`Git Suite: Cherry-pick failed: ${errMsg}`);
           }
         }
         break;
@@ -890,7 +890,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
             if (choice === 'Continue') await repo.revertContinue();
             else await repo.revertAbort();
           } else {
-            vscode.window.showErrorMessage(`GitCharm: Revert failed: ${errMsg}`);
+            vscode.window.showErrorMessage(`Git Suite: Revert failed: ${errMsg}`);
           }
         }
         break;
@@ -913,7 +913,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Drop commits failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Drop commits failed: ${String(e)}`);
         }
         break;
       }
@@ -942,7 +942,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Create patches failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Create patches failed: ${String(e)}`);
         }
         break;
       }
@@ -964,7 +964,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Drop commit failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Drop commit failed: ${String(e)}`);
         }
         break;
       }
@@ -986,7 +986,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Squash failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Squash failed: ${String(e)}`);
         }
         break;
       }
@@ -1008,7 +1008,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Undo commit failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Undo commit failed: ${String(e)}`);
         }
         break;
       }
@@ -1028,7 +1028,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Edit commit message failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Edit commit message failed: ${String(e)}`);
         }
         break;
       }
@@ -1053,7 +1053,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Create branch failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Create branch failed: ${String(e)}`);
         }
         break;
       }
@@ -1085,7 +1085,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           if (push === 'Push') await this.pushTagWithRemotePicker(repo, trimmed);
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Create tag failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Create tag failed: ${String(e)}`);
         }
         break;
       }
@@ -1122,7 +1122,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         if (!repo) return;
         const tags = await repo.getTagsForCommit(msg.hash).catch(() => [] as string[]);
         if (tags.length === 0) {
-          vscode.window.showInformationMessage('GitCharm: No tags on this commit.');
+          vscode.window.showInformationMessage('Git Suite: No tags on this commit.');
           return;
         }
         await this.showManageCommitTagsMenu(repo, msg.repoId, msg.hash, tags, msg.currentBranch);
@@ -1140,7 +1140,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Delete tag failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Delete tag failed: ${String(e)}`);
         }
         break;
       }
@@ -1163,7 +1163,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           return !checkedOutTagIn.includes(meta?.name ?? id);
         });
         if (eligibleRepoIds.length === 0) {
-          vscode.window.showWarningMessage(`GitCharm: Cannot delete tag "${msg.tagName}" — HEAD is detached on it in all target repositories.`);
+          vscode.window.showWarningMessage(`Git Suite: Cannot delete tag "${msg.tagName}" — HEAD is detached on it in all target repositories.`);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Checked out' });
           return;
         }
@@ -1199,7 +1199,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           }
         }
         if (errors.length > 0) {
-          vscode.window.showWarningMessage(`GitCharm: ${errors.length} error(s): ${errors.join('; ')}`);
+          vscode.window.showWarningMessage(`Git Suite: ${errors.length} error(s): ${errors.join('; ')}`);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: errors.join('; ') });
         } else {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
@@ -1212,15 +1212,15 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) { this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: 'Repo not found' }); return; }
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: `GitCharm: Pushing tag "${msg.tagName}" to ${msg.remote}…`, cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: `Git Suite: Pushing tag "${msg.tagName}" to ${msg.remote}…`, cancellable: false },
           async () => {
             try {
               await repo.pushTag(msg.tagName, msg.remote);
               this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
-              vscode.window.showInformationMessage(`GitCharm: Tag "${msg.tagName}" pushed to "${msg.remote}".`);
+              vscode.window.showInformationMessage(`Git Suite: Tag "${msg.tagName}" pushed to "${msg.remote}".`);
             } catch (e: unknown) {
               this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-              vscode.window.showErrorMessage(`GitCharm: Push tag failed: ${String(e)}`);
+              vscode.window.showErrorMessage(`Git Suite: Push tag failed: ${String(e)}`);
             }
           }
         );
@@ -1245,10 +1245,10 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           };
           this.post({ type: 'LOG_REFS_UPDATE', repoId: msg.repoId, branches: [...branches, detachedHeadEntry] });
           this.post({ type: 'LOG_REFRESH' });
-          vscode.window.showInformationMessage(`GitCharm: Checked out tag "${msg.tagName}" (detached HEAD).`);
+          vscode.window.showInformationMessage(`Git Suite: Checked out tag "${msg.tagName}" (detached HEAD).`);
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Checkout tag failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Checkout tag failed: ${String(e)}`);
         }
         break;
       }
@@ -1260,10 +1260,10 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           await repo.mergeTag(msg.tagName);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
           this.post({ type: 'LOG_REFRESH' });
-          vscode.window.showInformationMessage(`GitCharm: Merged tag "${msg.tagName}".`);
+          vscode.window.showInformationMessage(`Git Suite: Merged tag "${msg.tagName}".`);
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Merge tag failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Merge tag failed: ${String(e)}`);
         }
         break;
       }
@@ -1281,10 +1281,10 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           }
         }
         if (errors.length > 0) {
-          vscode.window.showWarningMessage(`GitCharm: ${errors.length} error(s): ${errors.join('; ')}`);
+          vscode.window.showWarningMessage(`Git Suite: ${errors.length} error(s): ${errors.join('; ')}`);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: false, error: errors.join('; ') });
         } else {
-          vscode.window.showInformationMessage(`GitCharm: Merged tag "${msg.tagName}" in ${msg.repoIds.length} ${msg.repoIds.length === 1 ? 'repository' : 'repositories'}.`);
+          vscode.window.showInformationMessage(`Git Suite: Merged tag "${msg.tagName}" in ${msg.repoIds.length} ${msg.repoIds.length === 1 ? 'repository' : 'repositories'}.`);
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: msg.requestId, ok: true });
         }
         this.post({ type: 'LOG_REFRESH' });
@@ -1311,7 +1311,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           this.post({ type: 'LOG_REFRESH' });
         } catch (e: unknown) {
           this.post({ type: 'LOG_BRANCH_OP_RESULT', requestId: reqId, ok: false, error: String(e) });
-          vscode.window.showErrorMessage(`GitCharm: Reset failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Reset failed: ${String(e)}`);
         }
         break;
       }
@@ -1320,7 +1320,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         const repo = this.manager.getRepo(msg.repoId);
         if (!repo) return;
         const remotes = await repo.getRemotes().catch(() => [] as string[]);
-        if (remotes.length === 0) { vscode.window.showWarningMessage('GitCharm: No remotes configured.'); return; }
+        if (remotes.length === 0) { vscode.window.showWarningMessage('Git Suite: No remotes configured.'); return; }
         const remotePick = remotes.length === 1
           ? remotes[0]
           : (await vscode.window.showQuickPick(
@@ -1329,13 +1329,13 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
             ) as { label: string; remote: string } | undefined)?.remote;
         if (!remotePick) return;
         await vscode.window.withProgress(
-          { location: vscode.ProgressLocation.Notification, title: `GitCharm: Pushing to ${remotePick}…`, cancellable: false },
+          { location: vscode.ProgressLocation.Notification, title: `Git Suite: Pushing to ${remotePick}…`, cancellable: false },
           async () => {
             try {
               await repo.push(false, remotePick);
-              vscode.window.showInformationMessage(`GitCharm: Pushed to "${remotePick}" successfully.`);
+              vscode.window.showInformationMessage(`Git Suite: Pushed to "${remotePick}" successfully.`);
             } catch (e: unknown) {
-              vscode.window.showErrorMessage(`GitCharm: Push failed: ${String(e)}`);
+              vscode.window.showErrorMessage(`Git Suite: Push failed: ${String(e)}`);
             }
           }
         );
@@ -1370,7 +1370,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
       }
 
       case 'LOG_SHOW_BRANCH_OPTIONS': {
-        await vscode.commands.executeCommand('gitcharm.showBranchOptions', msg.repoId, msg.branchName);
+        await vscode.commands.executeCommand('gitsuite.showBranchOptions', msg.repoId, msg.branchName);
         break;
       }
 
@@ -1445,7 +1445,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         ];
         const picked = await vscode.window.showQuickPick(items, {
           placeHolder: `Compare ${shortHash} with…`,
-          title: 'GitCharm - Compare Commit With',
+          title: 'Git Suite - Compare Commit With',
           matchOnDescription: true,
         });
         if (!picked?.ref) break;
@@ -1453,7 +1453,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         try {
           refHash = await repo.resolveRef(picked.ref);
         } catch {
-          vscode.window.showErrorMessage(`GitCharm: Cannot resolve ref "${picked.ref}"`);
+          vscode.window.showErrorMessage(`Git Suite: Cannot resolve ref "${picked.ref}"`);
           break;
         }
         const rootPath = repo.rootPath;
@@ -1558,7 +1558,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
 
   private async pushTagWithRemotePicker(repo: import('../git/GitService').GitService, tagName: string): Promise<void> {
     const remotes = await repo.getRemotes().catch(() => [] as string[]);
-    if (remotes.length === 0) { vscode.window.showWarningMessage('GitCharm: No remotes configured.'); return; }
+    if (remotes.length === 0) { vscode.window.showWarningMessage('Git Suite: No remotes configured.'); return; }
     const remotePick = remotes.length === 1
       ? remotes[0]
       : (await vscode.window.showQuickPick(
@@ -1567,13 +1567,13 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         ) as { label: string; remote: string } | undefined)?.remote;
     if (!remotePick) return;
     await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: `GitCharm: Pushing tag "${tagName}" to ${remotePick}…`, cancellable: false },
+      { location: vscode.ProgressLocation.Notification, title: `Git Suite: Pushing tag "${tagName}" to ${remotePick}…`, cancellable: false },
       async () => {
         try {
           await repo.pushTag(tagName, remotePick);
-          vscode.window.showInformationMessage(`GitCharm: Tag "${tagName}" pushed to "${remotePick}".`);
+          vscode.window.showInformationMessage(`Git Suite: Tag "${tagName}" pushed to "${remotePick}".`);
         } catch (e: unknown) {
-          vscode.window.showErrorMessage(`GitCharm: Push tag failed: ${String(e)}`);
+          vscode.window.showErrorMessage(`Git Suite: Push tag failed: ${String(e)}`);
         }
       }
     );
@@ -1622,7 +1622,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         );
         if (push === 'Push') await this.pushTagWithRemotePicker(repo, trimmed);
       } catch (e: unknown) {
-        vscode.window.showErrorMessage(`GitCharm: Create tag failed: ${String(e)}`);
+        vscode.window.showErrorMessage(`Git Suite: Create tag failed: ${String(e)}`);
       }
       return;
     }
@@ -1642,9 +1642,9 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
           try {
             await repo.mergeTag(tagName);
             this.post({ type: 'LOG_REFRESH' });
-            vscode.window.showInformationMessage(`GitCharm: Merged tag "${tagName}" into "${currentBranch}".`);
+            vscode.window.showInformationMessage(`Git Suite: Merged tag "${tagName}" into "${currentBranch}".`);
           } catch (e: unknown) {
-            vscode.window.showErrorMessage(`GitCharm: Merge tag failed: ${String(e)}`);
+            vscode.window.showErrorMessage(`Git Suite: Merge tag failed: ${String(e)}`);
           }
         },
       },
@@ -1664,9 +1664,9 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
             const rawTags = await repo.getTags();
             this.post({ type: 'LOG_TAGS_UPDATE', repoId, tags: rawTags.map(t => ({ ...t, repoId })) });
             this.post({ type: 'LOG_REFRESH' });
-            vscode.window.showInformationMessage(`GitCharm: Deleted tag "${tagName}".`);
+            vscode.window.showInformationMessage(`Git Suite: Deleted tag "${tagName}".`);
           } catch (e: unknown) {
-            vscode.window.showErrorMessage(`GitCharm: Delete tag failed: ${String(e)}`);
+            vscode.window.showErrorMessage(`Git Suite: Delete tag failed: ${String(e)}`);
           }
         },
       },

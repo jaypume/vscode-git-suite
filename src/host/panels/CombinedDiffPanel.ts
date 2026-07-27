@@ -10,11 +10,11 @@ export async function openCombinedDiffPanel(
 ): Promise<void> {
   const repo = manager.getRepo(repoId);
   if (!repo) {
-    vscode.window.showErrorMessage('GitCharm: Repository not found.');
+    vscode.window.showErrorMessage('Git Suite: Repository not found.');
     return;
   }
   if (hashes.length < 2) {
-    vscode.window.showErrorMessage('GitCharm: Select at least 2 commits to view combined diff.');
+    vscode.window.showErrorMessage('Git Suite: Select at least 2 commits to view combined diff.');
     return;
   }
 
@@ -35,12 +35,12 @@ export async function openCombinedDiffPanel(
     orderedHashes = await repo.getCombinedFilesOrder(hashes);
     commitMetas.sort((a, b) => orderedHashes.indexOf(a.hash) - orderedHashes.indexOf(b.hash));
   } catch (e: unknown) {
-    vscode.window.showErrorMessage(`GitCharm: Failed to load combined diff: ${String(e)}`);
+    vscode.window.showErrorMessage(`Git Suite: Failed to load combined diff: ${String(e)}`);
     return;
   }
 
   if (files.length === 0) {
-    vscode.window.showWarningMessage(`GitCharm: No files found for the selected commits (hashes: ${hashes.map(h => h.slice(0, 7)).join(', ')}). The commits may not be in the same repository branch.`);
+    vscode.window.showWarningMessage(`Git Suite: No files found for the selected commits (hashes: ${hashes.map(h => h.slice(0, 7)).join(', ')}). The commits may not be in the same repository branch.`);
     return;
   }
 

@@ -56,7 +56,7 @@ function ensureFontInjected(theme: IconThemeData) {
   const key = `${theme.fontId}::${theme.fontFaceUri}`;
   if (injectedFontKey === key) return;
   injectedFontKey = key;
-  const styleId = `gitcharm-icon-font-${theme.fontId}`;
+  const styleId = `gitsuite-icon-font-${theme.fontId}`;
   // Remove existing style so the new @font-face replaces it
   document.getElementById(styleId)?.remove();
   const style = document.createElement('style');

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type { WorkspaceStatus } from '../types/git';
 
 /**
- * Controls the numeric badge on the GitCharm activity-bar icon.
+ * Controls the numeric badge on the Git Suite activity-bar icon.
  *
  * VSCode propagates TreeView.badge to the activity-bar container icon reliably,
  * whereas WebviewView.badge has timing issues. We register a hidden TreeView
@@ -19,7 +19,7 @@ export class BadgeController implements vscode.Disposable {
       getTreeItem: () => { throw new Error('unreachable'); },
       getChildren: () => [],
     };
-    this.treeView = vscode.window.createTreeView('gitcharm.commitBadge', {
+    this.treeView = vscode.window.createTreeView('gitsuite.commitBadge', {
       treeDataProvider: emptyProvider,
     });
   }
@@ -32,7 +32,7 @@ export class BadgeController implements vscode.Disposable {
   startLoading(): void {
     if (this.progressResolve) return;
     vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Window, title: 'GitCharm: loading…' },
+      { location: vscode.ProgressLocation.Window, title: 'Git Suite: loading…' },
       () => new Promise<void>(resolve => { this.progressResolve = resolve; })
     );
   }

@@ -21,7 +21,7 @@ export async function openSquashEditor(
   return new Promise(resolve => {
     const nonce = generateNonce();
     const panel = vscode.window.createWebviewPanel(
-      'gitcharmSquash',
+      'gitsuiteSquash',
       `Squash ${commitCount} commits`,
       vscode.ViewColumn.One,
       { enableScripts: true, retainContextWhenHidden: false }

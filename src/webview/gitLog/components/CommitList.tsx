@@ -50,12 +50,12 @@ function generateId() {
 }
 
 const BG_ANIM_STYLE = `
-@keyframes gitcharm-bg-load {
+@keyframes gitsuite-bg-load {
   0%   { transform: translateX(-100%); }
   50%  { transform: translateX(150%); }
   100% { transform: translateX(150%); }
 }
-@keyframes gitcharm-skeleton-pulse {
+@keyframes gitsuite-skeleton-pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
@@ -117,7 +117,7 @@ export function CommitList({ layout, selectedHash, repoColors, repos, currentBra
   }, [commits.length, repos.length, storeHasMore]);
 
   useEffect(() => {
-    const id = 'gitcharm-log-action-btn-hover';
+    const id = 'gitsuite-log-action-btn-hover';
     if (document.getElementById(id)) return;
     const s = document.createElement('style');
     s.id = id;
@@ -1289,7 +1289,7 @@ const skeletonStyles = {
     paddingRight: '8px',
     flexShrink: 0,
     opacity: 1 - i * (0.6 / total),
-    animation: `gitcharm-skeleton-pulse 1.8s ease-in-out ${(i * 0.04).toFixed(2)}s infinite`,
+    animation: `gitsuite-skeleton-pulse 1.8s ease-in-out ${(i * 0.04).toFixed(2)}s infinite`,
   }),
   graph: {
     width: 24,
@@ -1560,6 +1560,6 @@ const styles = {
     height: '100%',
     width: '40%',
     background: 'var(--vscode-progressBar-background)',
-    animation: 'gitcharm-bg-load 1.4s ease-in-out infinite',
+    animation: 'gitsuite-bg-load 1.4s ease-in-out infinite',
   } as React.CSSProperties,
 };

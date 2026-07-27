@@ -12,7 +12,7 @@ export class ProfileStatusBar implements vscode.Disposable {
     private readonly manager?: WorkspaceGitManager,
   ) {
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-    this.statusBarItem.command = 'gitcharm.manageProfiles';
+    this.statusBarItem.command = 'gitsuite.manageProfiles';
     this.statusBarItem.show();
 
     this.disposables.push(
@@ -66,12 +66,12 @@ export class ProfileStatusBar implements vscode.Disposable {
     const sourceBadge = source === 'local' ? ' (local)' : source === 'global' ? ' (global)' : '';
     this.statusBarItem.text = `$(account) ${displayName}`;
     this.statusBarItem.tooltip =
-      `GitCharm Profile: ${profile.gitName} <${profile.gitEmail}>${sourceBadge}\nClick to manage profiles`;
+      `Git Suite Profile: ${profile.gitName} <${profile.gitEmail}>${sourceBadge}\nClick to manage profiles`;
   }
 
   private renderNoProfile(): void {
     this.statusBarItem.text = `$(account) No profile`;
-    this.statusBarItem.tooltip = 'GitCharm: No Git identity configured — click to set one';
+    this.statusBarItem.tooltip = 'Git Suite: No Git identity configured — click to set one';
   }
 
   // ── Main menu ────────────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ export class ProfileStatusBar implements vscode.Disposable {
     );
 
     const pick = await vscode.window.showQuickPick(items, {
-      title: 'GitCharm — Git Profiles',
+      title: 'Git Suite — Git Profiles',
       matchOnDescription: true,
     }) as MenuItem | undefined;
 
@@ -164,7 +164,7 @@ export class ProfileStatusBar implements vscode.Disposable {
         action: async () => {
           await this.profileService.setActiveProfile(id);
           this.refresh();
-          vscode.window.showInformationMessage(`GitCharm: ${label} set as active profile for this workspace.`);
+          vscode.window.showInformationMessage(`Git Suite: ${label} set as active profile for this workspace.`);
         },
       });
     } else {
@@ -228,7 +228,7 @@ export class ProfileStatusBar implements vscode.Disposable {
   private async activateProfile(profile: GitProfile): Promise<void> {
     await this.profileService.setActiveProfile(profile.id);
     this.refresh();
-    vscode.window.showInformationMessage(`GitCharm: "${profile.name}" is now active.`);
+    vscode.window.showInformationMessage(`Git Suite: "${profile.name}" is now active.`);
   }
 
   async createProfile(): Promise<void> {
@@ -307,7 +307,7 @@ export class ProfileStatusBar implements vscode.Disposable {
 
     await this.profileService.saveProfile({ ...profile, name: displayName.trim(), gitName: gitName.trim(), gitEmail: gitEmail.trim() });
     this.refresh();
-    vscode.window.showInformationMessage(`GitCharm: Profile "${displayName}" updated.`);
+    vscode.window.showInformationMessage(`Git Suite: Profile "${displayName}" updated.`);
   }
 
   private async deleteProfile(profile: GitProfile): Promise<void> {
@@ -319,7 +319,7 @@ export class ProfileStatusBar implements vscode.Disposable {
     if (!confirm?.value) return;
     await this.profileService.deleteProfile(profile.id);
     this.refresh();
-    vscode.window.showInformationMessage(`GitCharm: Profile "${profile.name}" deleted.`);
+    vscode.window.showInformationMessage(`Git Suite: Profile "${profile.name}" deleted.`);
   }
 
   // ── Command palette: switch ───────────────────────────────────────────────────
@@ -327,7 +327,7 @@ export class ProfileStatusBar implements vscode.Disposable {
   async switchProfile(): Promise<void> {
     const profiles = this.profileService.getProfiles().filter(p => !p.builtIn);
     if (profiles.length === 0) {
-      const create = await vscode.window.showWarningMessage('GitCharm: No profiles configured.', 'Create Profile');
+      const create = await vscode.window.showWarningMessage('Git Suite: No profiles configured.', 'Create Profile');
       if (create) await this.createProfile();
       return;
     }
@@ -341,7 +341,7 @@ export class ProfileStatusBar implements vscode.Disposable {
     }));
 
     const pick = await vscode.window.showQuickPick(items, {
-      title: 'GitCharm — Switch Git Profile',
+      title: 'Git Suite — Switch Git Profile',
       matchOnDescription: true,
     }) as Item | undefined;
 
@@ -350,7 +350,7 @@ export class ProfileStatusBar implements vscode.Disposable {
     const selected = profiles.find(p => p.id === pick.id);
     if (selected) {
       this.refresh();
-      vscode.window.showInformationMessage(`GitCharm: "${selected.name}" is now active.`);
+      vscode.window.showInformationMessage(`Git Suite: "${selected.name}" is now active.`);
     }
   }
 
