@@ -179,6 +179,12 @@
         "icon": "$(check)"
       },
       {
+        "command": "gitsuite.nav.branch.currentMark",
+        "title": "Current Branch",
+        "category": "Git Suite",
+        "icon": "$(circle-filled)"
+      },
+      {
         "command": "gitsuite.nav.branch.merge",
         "title": "Merge into Current",
         "category": "Git Suite",
@@ -572,6 +578,11 @@
         {
           "command": "gitsuite.nav.branch.checkout",
           "when": "view == gitsuite.navigator && viewItem =~ /^gitsuite\\.nav\\.branch\\.(local|remote)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "gitsuite.nav.branch.currentMark",
+          "when": "view == gitsuite.navigator && viewItem == gitsuite.nav.branch.local.head",
           "group": "inline@1"
         },
         {

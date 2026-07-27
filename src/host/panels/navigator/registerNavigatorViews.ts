@@ -177,6 +177,8 @@ export function registerNavigatorViews(manager: WorkspaceGitManager, logPanel: G
     try { await repo.checkout(node.branch.isRemote ? node.branch.fullName : node.branch.name); await refreshAfter(); }
     catch (e: unknown) { vscode.window.showErrorMessage(`Git Suite: checkout failed: ${String(e)}`); }
   }));
+  // No-op marker shown on the HEAD branch (it's already current).
+  disposables.push(vscode.commands.registerCommand('gitsuite.nav.branch.currentMark', () => {}));
   disposables.push(vscode.commands.registerCommand('gitsuite.nav.branch.merge', async (node: NavNode) => {
     if (node.kind !== 'branch') return;
     const repo = manager.getRepo(node.repoId);

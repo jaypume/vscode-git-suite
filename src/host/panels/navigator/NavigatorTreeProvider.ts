@@ -30,6 +30,18 @@ function baseName(b: BranchInfo): string {
   return b.name.replace(/^refs\/heads\//, '');
 }
 
+const PRIMARY_BRANCHES = new Set(['main', 'master', 'develop', 'dev', 'trunk']);
+
+/** Branch sort: primary first, then HEAD, then local before remote, then alpha. */
+function branchComparator(a: BranchInfo, b: BranchInfo): number {
+  const ap = PRIMARY_BRANCHES.has(baseName(a)) ? 0 : 1;
+  const bp = PRIMARY_BRANCHES.has(baseName(b)) ? 0 : 1;
+  if (ap !== bp) return ap - bp;
+  if (a.isHead !== b.isHead) return a.isHead ? -1 : 1;
+  if (a.isRemote !== b.isRemote) return a.isRemote ? 1 : -1;
+  return baseName(a).localeCompare(baseName(b));
+}
+
 /**
  * Unified Git Navigator: branches / tags / stashes / worktrees in one native
  * TreeView, replacing the three separate views. Default grouping is by repo.
@@ -129,18 +141,14 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
   private branchesFor(repoId: string): BranchInfo[] {
     return this.branches
       .filter(b => b.repoId === repoId && !b.detachedTag && !b.detachedHash)
-      .sort((a, b) => {
-        if (a.isRemote !== b.isRemote) return a.isRemote ? 1 : -1;
-        if (a.isHead !== b.isHead) return a.isHead ? -1 : 1;
-        return baseName(a).localeCompare(baseName(b));
-      });
+      .sort(branchComparator);
   }
 
   /** Flat (cross-repo) branch nodes — no merging, each carries its repoId. */
   private flatBranches(): NavNode[] {
     return this.branches
       .filter(b => !b.detachedTag && !b.detachedHash && this.isVisibleRepo(b.repoId))
-      .sort((a, b) => baseName(a).localeCompare(baseName(b)))
+      .sort(branchComparator)
       .map(b => ({ kind: 'branch', repoId: b.repoId, branch: b }));
   }
 
@@ -261,7 +269,9 @@ export class NavigatorTreeProvider implements vscode.TreeDataProvider<NavNode> {
         const b = node.branch;
         const label = baseName(b);
         const item = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.None);
-        item.iconPath = new vscode.ThemeIcon(b.isRemote ? 'cloud' : 'git-branch');
+        // HEAD branch: green icon (deck-style active look)
+        const color = b.isHead ? new vscode.ThemeColor('charts.green') : undefined;
+        item.iconPath = new vscode.ThemeIcon(b.isRemote ? 'cloud' : 'git-branch', color);
         const parts: string[] = [];
         if (b.isHead) parts.push('current');
         if (b.aheadBehind && (b.aheadBehind.ahead || b.aheadBehind.behind)) parts.push(`↑${b.aheadBehind.ahead} ↓${b.aheadBehind.behind}`);
