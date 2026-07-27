@@ -124,6 +124,12 @@
         "icon": "$(list-tree)"
       },
       {
+        "command": "gitsuite.branches.refresh",
+        "title": "Refresh Branches",
+        "category": "Git Suite",
+        "icon": "$(refresh)"
+      },
+      {
         "command": "gitsuite.stash.pop",
         "title": "Pop Stash",
         "category": "Git Suite"
@@ -372,6 +378,16 @@
           "command": "gitsuite.log.toggleFileViewMode",
           "when": "view == gitsuite.commitFileTree",
           "group": "navigation@1"
+        },
+        {
+          "command": "gitsuite.fetchAll",
+          "when": "view == gitsuite.branches",
+          "group": "navigation@1"
+        },
+        {
+          "command": "gitsuite.branches.refresh",
+          "when": "view == gitsuite.branches",
+          "group": "navigation@2"
         },
         {
           "command": "gitsuite.fetchAll",

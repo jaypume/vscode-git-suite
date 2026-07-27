@@ -57,7 +57,9 @@ export class CommitFileTreeProvider implements vscode.TreeDataProvider<CommitFil
     const item = new vscode.TreeItem(path.basename(f.path), vscode.TreeItemCollapsibleState.None);
     item.iconPath = new vscode.ThemeIcon('file');
     item.description = statusDescription(f);
-    item.resourceUri = vscode.Uri.file(path.join(node.repoRoot, f.path));
+    // Custom scheme carries the git status so our FileDecorationProvider can color
+    // the label without polluting real workspace files (vscode.Uri.file would).
+    item.resourceUri = vscode.Uri.parse(`gitsuite-log-file://commit/${encodeURIComponent(f.path)}?status=${f.status}`);
     item.tooltip = new vscode.MarkdownString(`${f.path}\n\nstatus: **${f.status}**${f.oldPath ? `  (was ${f.oldPath})` : ''}`);
     item.contextValue = 'gitsuite.logFile';
     const sel = logUiState.selected;
