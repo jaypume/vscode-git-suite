@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import type { WorkspaceGitManager } from '../../git/WorkspaceGitManager';
 import type { GitLogPanelProvider } from '../GitLogPanelProvider';
+import type { CommitPanelProvider } from '../CommitPanelProvider';
 import { NavigatorTreeProvider, type NavGroupBy, type NavNode } from './NavigatorTreeProvider';
 
 const GROUP_BY_KEY = 'gitsuite.nav.groupBy';
@@ -9,9 +10,10 @@ const ACTIVE_REPO_KEY = 'gitsuite.nav.activeRepo';
 
 /**
  * Register the unified Git Navigator view: grouping switch + stash/worktree
- * actions (node-signature) + inline hover buttons + repo activation (sync Git Log).
+ * actions (node-signature) + inline hover buttons + repo activation (sync Git Log
+ * + Commit panel).
  */
-export function registerNavigatorViews(manager: WorkspaceGitManager, logPanel: GitLogPanelProvider): vscode.Disposable[] {
+export function registerNavigatorViews(manager: WorkspaceGitManager, logPanel: GitLogPanelProvider, commitPanel: CommitPanelProvider): vscode.Disposable[] {
   const disposables: vscode.Disposable[] = [];
   const provider = new NavigatorTreeProvider(manager);
   const treeView = vscode.window.createTreeView('gitsuite.navigator', { treeDataProvider: provider, showCollapseAll: true });
@@ -34,6 +36,7 @@ export function registerNavigatorViews(manager: WorkspaceGitManager, logPanel: G
     vscode.commands.executeCommand('setContext', ACTIVE_REPO_KEY, repoId);
     if (repoId) {
       logPanel.focusRepo(repoId);
+      commitPanel.focusRepo(repoId);
       // reveal the activated repo node so its content shows
       const node = provider.repoNode(repoId);
       if (node) treeView.reveal(node, { expand: true, select: false }).then(undefined, () => {});

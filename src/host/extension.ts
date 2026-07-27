@@ -224,7 +224,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(badgeDisposable);
   const logPanel = new GitLogPanelProvider(context.extensionUri, manager);
   context.subscriptions.push(...registerLogTreeViews(manager));
-  context.subscriptions.push(...registerNavigatorViews(manager, logPanel));
+  context.subscriptions.push(...registerNavigatorViews(manager, logPanel, commitPanel));
   context.subscriptions.push(...registerSCM(manager));
   const mergeEditor = new MergeEditorProvider(context.extensionUri, manager);
   const undockedPanel = new UndockedPanelProvider(context.extensionUri, commitPanel, logPanel);

@@ -88,6 +88,7 @@ export type HostToCommitMsg =
   | { type: 'WORKTREE_OP_RESULT'; requestId: string; repoId: string; op: 'create' | 'delete' | 'prune' | 'lock' | 'unlock'; ok: boolean; error?: string }
   | { type: 'COMMIT_HIDDEN_REPOS_UPDATE'; hiddenRepoIds: string[] }
   | { type: 'COMMIT_SWITCH_TAB'; tab: 'changes' | 'shelf' | 'stash' | 'worktree' | 'push' }
+  | { type: 'COMMIT_FOCUS_REPO'; repoId: string }
   | { type: 'COMMIT_DESELECT_FILE'; filePath: string };
 
 // ─── Commit Panel: WebView → Host ────────────────────────────────────────────

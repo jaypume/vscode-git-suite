@@ -776,17 +776,17 @@
         {
           "command": "gitsuite.scm.aiMessage",
           "group": "navigation",
-          "when": "scmProvider =~ /^gitsuite-/"
+          "when": "scmProvider =~ /^gitsuite/"
         },
         {
           "command": "gitsuite.scm.commitAndPush",
           "group": "navigation",
-          "when": "scmProvider =~ /^gitsuite-/"
+          "when": "scmProvider =~ /^gitsuite/"
         },
         {
           "command": "gitsuite.scm.commitAmend",
           "group": "1_commit",
-          "when": "scmProvider =~ /^gitsuite-/"
+          "when": "scmProvider =~ /^gitsuite/"
         }
       ],
       "scm/resourceGroup/context": [

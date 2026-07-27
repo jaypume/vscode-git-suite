@@ -748,8 +748,8 @@ export function PushTab({ repos, repoMetas, unpushedMap, onPush, onForcePush, on
       {/* Scrollable repo list */}
       <div style={css.list}>
         {repos.map(repoStatus => (
+          <div id={`gs-push-repo-${CSS.escape(repoStatus.repoId)}`} key={repoStatus.repoId}>
           <RepoSection
-            key={repoStatus.repoId}
             repoStatus={repoStatus}
             repoMeta={metaMap.get(repoStatus.repoId)}
             unpushed={unpushedMap[repoStatus.repoId]}
@@ -769,6 +769,7 @@ export function PushTab({ repos, repoMetas, unpushedMap, onPush, onForcePush, on
             onBranchClick={onBranchClick}
             aiEnabled={aiEnabled}
           />
+          </div>
         ))}
       </div>
 

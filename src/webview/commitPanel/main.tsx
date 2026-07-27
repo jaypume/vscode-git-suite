@@ -504,6 +504,18 @@ function App() {
           if (msg.tab === 'push') repos.forEach(r => requestUnpushedCommits(r.repoId));
           break;
 
+        case 'COMMIT_FOCUS_REPO': {
+          setActiveTab('push');
+          const repoId = msg.repoId;
+          if (repos.some(r => r.repoId === repoId)) requestUnpushedCommits(repoId);
+          // scroll to the repo section after render
+          setTimeout(() => {
+            const el = document.getElementById(`gs-push-repo-${CSS.escape(repoId)}`);
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+          break;
+        }
+
         case 'COMMIT_DESELECT_FILE':
           setSelectedFile(prev => {
             if (!prev) return null;

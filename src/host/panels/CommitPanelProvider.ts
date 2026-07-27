@@ -280,6 +280,12 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
     this.post({ type: 'COMMIT_SWITCH_TAB', tab });
   }
 
+  /** Switch the commit panel to the Push tab and scroll to a repo's section. */
+  focusRepo(repoId: string): void {
+    this.switchToTab('push');
+    this.post({ type: 'COMMIT_FOCUS_REPO', repoId });
+  }
+
   /** Reads fresh status after a stage/unstage op. simple-git reads directly from the git index so it's always accurate once the op completes. */
   private async refreshStatusAfterOp(): Promise<WorkspaceStatus> {
     return this.manager.getAllStatusesFresh();
