@@ -73,6 +73,16 @@
           "retainContextWhenHidden": true
         },
         {
+          "type": "tree",
+          "id": "gitsuite.stash",
+          "name": "Stash"
+        },
+        {
+          "type": "tree",
+          "id": "gitsuite.worktrees",
+          "name": "Worktrees"
+        },
+        {
           "id": "gitsuite.commitBadge",
           "name": "",
           "when": "false"
@@ -112,6 +122,71 @@
         "title": "Toggle Tree/Flat View",
         "category": "Git Suite",
         "icon": "$(list-tree)"
+      },
+      {
+        "command": "gitsuite.stash.pop",
+        "title": "Pop Stash",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.stash.apply",
+        "title": "Apply Stash",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.stash.drop",
+        "title": "Drop Stash",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.stash.rename",
+        "title": "Rename Stash",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.stash.openFileDiff",
+        "title": "Open Changes",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.openInExplorer",
+        "title": "Reveal in Explorer",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.openInNewWindow",
+        "title": "Open in New Window",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.openInOS",
+        "title": "Reveal in File Manager",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.addToWorkspace",
+        "title": "Add to Workspace",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.lock",
+        "title": "Lock Worktree",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.unlock",
+        "title": "Unlock Worktree",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.remove",
+        "title": "Remove Worktree",
+        "category": "Git Suite"
+      },
+      {
+        "command": "gitsuite.worktree.prune",
+        "title": "Prune Worktrees",
+        "category": "Git Suite"
       },
       {
         "command": "gitsuite.openLog",
@@ -339,6 +414,71 @@
           "command": "gitsuite.log.openFileDiff",
           "when": "view == gitsuite.commitFileTree && viewItem == gitsuite.logFile",
           "group": "navigation@1"
+        },
+        {
+          "command": "gitsuite.stash.pop",
+          "when": "view == gitsuite.stash && viewItem == gitsuite.stash",
+          "group": "stash@1"
+        },
+        {
+          "command": "gitsuite.stash.apply",
+          "when": "view == gitsuite.stash && viewItem == gitsuite.stash",
+          "group": "stash@2"
+        },
+        {
+          "command": "gitsuite.stash.rename",
+          "when": "view == gitsuite.stash && viewItem == gitsuite.stash",
+          "group": "stash@3"
+        },
+        {
+          "command": "gitsuite.stash.drop",
+          "when": "view == gitsuite.stash && viewItem == gitsuite.stash",
+          "group": "stash@9"
+        },
+        {
+          "command": "gitsuite.stash.openFileDiff",
+          "when": "view == gitsuite.stash && viewItem == gitsuite.stashFile",
+          "group": "navigation@1"
+        },
+        {
+          "command": "gitsuite.worktree.openInExplorer",
+          "when": "view == gitsuite.worktrees && viewItem =~ /gitsuite.worktree/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "gitsuite.worktree.openInNewWindow",
+          "when": "view == gitsuite.worktrees && viewItem =~ /gitsuite.worktree/",
+          "group": "navigation@2"
+        },
+        {
+          "command": "gitsuite.worktree.addToWorkspace",
+          "when": "view == gitsuite.worktrees && viewItem =~ /gitsuite.worktree/",
+          "group": "navigation@3"
+        },
+        {
+          "command": "gitsuite.worktree.openInOS",
+          "when": "view == gitsuite.worktrees && viewItem =~ /gitsuite.worktree/",
+          "group": "worktree@1"
+        },
+        {
+          "command": "gitsuite.worktree.lock",
+          "when": "view == gitsuite.worktrees && viewItem == gitsuite.worktree",
+          "group": "worktree@2"
+        },
+        {
+          "command": "gitsuite.worktree.unlock",
+          "when": "view == gitsuite.worktrees && viewItem == gitsuite.worktree.locked",
+          "group": "worktree@2"
+        },
+        {
+          "command": "gitsuite.worktree.prune",
+          "when": "view == gitsuite.worktrees && viewItem == gitsuite.wtRepo",
+          "group": "worktree@3"
+        },
+        {
+          "command": "gitsuite.worktree.remove",
+          "when": "view == gitsuite.worktrees && viewItem =~ /gitsuite.worktree/",
+          "group": "worktree@9"
         }
       ],
       "editor/title": [

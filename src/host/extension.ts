@@ -5,6 +5,7 @@ import { GitLogPanelProvider } from './panels/GitLogPanelProvider';
 import { MergeEditorProvider } from './panels/MergeEditorProvider';
 import { UndockedPanelProvider } from './panels/UndockedPanelProvider';
 import { registerLogTreeViews } from './panels/log/registerLogTreeViews';
+import { registerCommitTreeViews } from './panels/commit/registerCommitTreeViews';
 import { BranchStatusBar } from './ui/BranchStatusBar';
 import { BadgeController } from './ui/BadgeController';
 import { registerCommands } from './commands/registerCommands';
@@ -208,6 +209,7 @@ export function activate(context: vscode.ExtensionContext): void {
   profileService.autoInitIfEmpty();
 
   const commitPanel = new CommitPanelProvider(context.extensionUri, manager, context.globalStorageUri.fsPath, shelveDocProvider, undefined, profileService, context.globalState, context.workspaceState);
+  context.subscriptions.push(...registerCommitTreeViews(manager, commitPanel));
 
   let startupNotificationsDone = false;
   const badgeDisposable = manager.onStatusChange(status => { badge.update(status); });
