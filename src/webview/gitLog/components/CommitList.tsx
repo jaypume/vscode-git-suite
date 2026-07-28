@@ -344,7 +344,29 @@ export function CommitList({ layout, selectedHash, repoColors, repos, currentBra
                 }, 120);
               }}
               onClick={(e) => {
-                if (e.ctrlKey || e.metaKey) {
+                if (e.shiftKey) {
+                  // Range select from the current single-selection anchor to this row.
+                  e.preventDefault();
+                  const anchorIdx = selectedHash ? commits.findIndex(c => `${c.hash}:${c.repoId}` === selectedHash) : -1;
+                  const curIdx = vrow.index;
+                  if (anchorIdx < 0) {
+                    // No anchor yet — just select this one.
+                    setMultiSelectHashes(new Set());
+                    onSelect(commit);
+                    return;
+                  }
+                  const [from, to] = anchorIdx <= curIdx ? [anchorIdx, curIdx] : [curIdx, anchorIdx];
+                  const range: string[] = [];
+                  for (let i = from; i <= to; i++) {
+                    const c = commits[i];
+                    if (!c) continue;
+                    // Keep range within the same repo and same stash/non-stash kind.
+                    if (c.repoId !== commit.repoId) continue;
+                    if (!!c.isStash !== !!commit.isStash) continue;
+                    range.push(`${c.hash}:${c.repoId}`);
+                  }
+                  setMultiSelectHashes(new Set(range));
+                } else if (e.ctrlKey || e.metaKey) {
                   setMultiSelectHashes(prev => {
                     const next = new Set(prev);
                     const key = `${commit.hash}:${commit.repoId}`;
@@ -504,7 +526,7 @@ export function CommitList({ layout, selectedHash, repoColors, repos, currentBra
                 <Codicon name="arrow-up" style={styles.unpushedIcon} title="Not pushed" />
               )}
               <div style={styles.meta}>
-                <AuthorAvatar authorName={commit.isStash ? 'You' : commit.authorName} authorEmail={commit.authorEmail} size={20} isYou={commit.isStash} />
+                <AuthorAvatar authorName={commit.isStash ? 'You' : commit.authorName} authorEmail={commit.authorEmail} size={18} isYou={commit.isStash} />
                 {containerWidth > 500 && <span style={styles.author}>{commit.isStash ? 'You' : formatAuthorName(commit.authorName)}</span>}
               </div>
               <span style={styles.date}>{formatDateTime(commit.authorDate)}</span>
@@ -907,7 +929,12 @@ function CommitContextMenu({ commit, x, y, multiSelected, allCommits, currentBra
   }
 
   function copyHash() {
-    navigator.clipboard.writeText(commit.hash).catch(() => {});
+    // Multi-select: copy all selected hashes (oldest-first, newline-separated).
+    // Single: copy just this commit's hash.
+    const text = isMulti
+      ? sortedOldestFirst.map(c => c.hash).join('\n')
+      : commit.hash;
+    navigator.clipboard.writeText(text).catch(() => {});
     onClose();
   }
 
@@ -988,7 +1015,7 @@ function CommitContextMenu({ commit, x, y, multiSelected, allCommits, currentBra
       <div ref={menuRef} style={ctxStyles.menu(menuPos.left, menuPos.top, menuPos.maxHeight)}>
         <div data-ctx-item="" style={ctxStyles.item} onClick={copyHash}>
           <Codicon name="copy" style={ctxStyles.icon} />
-          <span>Copy Revision Number</span>
+          <span>{isMulti ? `Copy ${multiSelected.length} Revision Numbers` : 'Copy Revision Number'}</span>
         </div>
         <div style={ctxStyles.separator} />
         <div data-ctx-item="" style={ctxStyles.item} onClick={() => send({ type: 'LOG_OPEN_EXTENDED_DETAIL', repoId: commit.repoId, hash: commit.hash })}>

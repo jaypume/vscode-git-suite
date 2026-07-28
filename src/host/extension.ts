@@ -222,7 +222,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   });
   context.subscriptions.push(badgeDisposable);
-  const logPanel = new GitLogPanelProvider(context.extensionUri, manager);
+  const logPanel = new GitLogPanelProvider(context.extensionUri, manager, context);
   context.subscriptions.push(...registerLogTreeViews(manager));
   context.subscriptions.push(...registerNavigatorViews(manager, logPanel));
   context.subscriptions.push(...registerSCM(manager));

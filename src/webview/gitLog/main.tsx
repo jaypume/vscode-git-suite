@@ -33,6 +33,8 @@ function App() {
   const loadingInFlightRef = useRef(false);
   // Current requestId — used to discard responses from superseded requests
   const activeRequestIdRef = useRef<string | null>(null);
+  // True once the first LOG_INIT_DATA has kicked off the initial commit load.
+  const initDoneRef = useRef(false);
 
   const send = useCallback((msg: LogToHostMsg) => {
     getVsCodeApi().postMessage(msg);
@@ -60,7 +62,7 @@ function App() {
       }
 
       switch (msg.type) {
-        case 'LOG_INIT_DATA':
+        case 'LOG_INIT_DATA': {
           // setRepos/setBranches unconditionally overwrite (not merge), while iconTheme is
           // conditional. So the host MUST send repos+branches+iconTheme in ONE message —
           // splitting them (e.g. {repos,branches} then {iconTheme}) would set repos/branches
@@ -68,7 +70,28 @@ function App() {
           store.setRepos(msg.repos, msg.hasWorkspaceFolder, msg.aiEnabled);
           store.setBranches(msg.branches);
           if (msg.iconTheme) store.setIconTheme(msg.iconTheme);
+          // First LOG_INIT_DATA carries the persisted selectedRepoId (or null). Kick off the
+          // initial commit load filtered to it — done here rather than on mount so we don't
+          // flash the full multi-repo list before switching to the remembered repo.
+          if (!initDoneRef.current) {
+            initDoneRef.current = true;
+            // Remembered repo wins; otherwise default to the first visible repo so the
+            // panel opens on a single repository instead of the full multi-repo list.
+            const initialRepo = msg.selectedRepoId ?? msg.repos[0]?.id ?? null;
+            if (initialRepo) {
+              store.setCommitFilters({ repoId: initialRepo });
+              reloadCommits({ repoId: initialRepo });
+              // Persist the defaulted choice too, so the host and webview stay in sync and
+              // the next session is deterministic rather than re-deriving from repos[0].
+              if (!msg.selectedRepoId) {
+                getVsCodeApi().postMessage({ type: 'LOG_SELECTED_REPO_CHANGED', repoId: initialRepo });
+              }
+            } else {
+              reloadCommits();
+            }
+          }
           break;
+        }
         case 'LOG_COMMITS_BATCH': {
           const match = msg.requestId === activeRequestIdRef.current;
           if (!match) break;
@@ -118,16 +141,9 @@ function App() {
     };
     window.addEventListener('message', handler);
 
-    // Initial load
-    const initReqId = generateId();
-    activeRequestIdRef.current = initReqId;
-    send({
-      type: 'LOG_REQUEST_COMMITS',
-      repoIds: [],
-      limit: LOAD_STEP,
-      skip: 0,
-      requestId: initReqId,
-    });
+    // Initial commit load is deferred to the first LOG_INIT_DATA (which carries the
+    // persisted selectedRepoId), so the panel opens directly on the remembered repo
+    // instead of flashing the full multi-repo list first.
 
     return () => window.removeEventListener('message', handler);
   }, []);
@@ -263,6 +279,8 @@ function App() {
     store.setCommitFilters({ repoId });
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     reloadCommits({ repoId });
+    // Persist selection so the next session reopens this repo directly.
+    getVsCodeApi().postMessage({ type: 'LOG_SELECTED_REPO_CHANGED', repoId });
   }, [reloadCommits]);
   filterRepoRef.current = (repoId: string | null, branch?: string | null) => {
     const filters: { repoId: string | null; branch?: string } = { repoId };

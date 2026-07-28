@@ -3,8 +3,8 @@ import { anonymousLaneColor } from './refs';
 import { headColor, primaryBranchColor, currentPalette, branchPaletteIndex } from '../../shared/branchColors';
 import { isPrimaryBranch } from '../../shared/branchUtils';
 
-export const LANE_WIDTH = 20;
-export const ROW_HEIGHT = 28;
+export const LANE_WIDTH = 16;
+export const ROW_HEIGHT = 22;
 export const DOT_RADIUS = 4;
 
 export function laneX(col: number): number {

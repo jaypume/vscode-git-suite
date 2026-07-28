@@ -81,6 +81,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
   private refreshDebounce: ReturnType<typeof setTimeout> | null = null;
   private commitPanel?: CommitPanelProvider;
   private undockedPanel?: UndockedPanelProvider;
+  private static readonly SELECTED_REPO_KEY = 'gitLog:selectedRepoId';
   private hiddenRepoIds: string[] = [];
   private pendingFilterRepoId: string | null = null;
   private pendingFilterBranch: string | null = null;
@@ -149,7 +150,8 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
 
   constructor(
     private readonly extensionUri: vscode.Uri,
-    private readonly manager: WorkspaceGitManager
+    private readonly manager: WorkspaceGitManager,
+    private readonly context: vscode.ExtensionContext
   ) {
     // Register manager listeners here so they fire even when the panel has never been opened.
     // this.post() silently drops messages when the webview is not yet resolved — that's fine,
@@ -284,9 +286,10 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
 
   private post(msg: HostToLogMsg): void {
     if (msg.type === 'LOG_INIT_DATA') {
-      const m = msg as typeof msg & { hasWorkspaceFolder?: boolean; aiEnabled?: boolean };
+      const m = msg as typeof msg & { hasWorkspaceFolder?: boolean; aiEnabled?: boolean; selectedRepoId?: string | null };
       if (m.hasWorkspaceFolder === undefined) m.hasWorkspaceFolder = (vscode.workspace.workspaceFolders?.length ?? 0) > 0;
       if (m.aiEnabled === undefined) m.aiEnabled = vscode.workspace.getConfiguration('gitsuite').get<boolean>('ai.enabled', true);
+      if (m.selectedRepoId === undefined) m.selectedRepoId = this.getSelectedRepoId();
     }
     if (this.activeReplyTarget === 'undocked') {
       this.undockedPanel?.postToLog(msg);
@@ -318,6 +321,19 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     return this.manager.getRepoMetas().filter(m => !m.isWorktree);
   }
 
+  /** The repository the user last selected in the Git Log, persisted across reloads. */
+  private getSelectedRepoId(): string | null {
+    const stored = this.context.workspaceState.get<string | null>(GitLogPanelProvider.SELECTED_REPO_KEY, null);
+    if (!stored) return null;
+    // Drop stale ids (repo removed/hidden) so we don't filter to a nonexistent repo.
+    const visible = this.getVisibleRepos();
+    return visible.some(r => r.id === stored) ? stored : null;
+  }
+
+  private async setSelectedRepoId(repoId: string | null): Promise<void> {
+    await this.context.workspaceState.update(GitLogPanelProvider.SELECTED_REPO_KEY, repoId);
+  }
+
   private getVisibleRepos() {
     return this.getNonWorktreeRepos().filter(m => !this.hiddenRepoIds.includes(m.id));
   }
@@ -333,6 +349,11 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
 
   private async handleMessage(msg: LogToHostMsg): Promise<void> {
     switch (msg.type) {
+      case 'LOG_SELECTED_REPO_CHANGED': {
+        // Persist the user's repo choice so the next session reopens it directly.
+        await this.setSelectedRepoId(msg.repoId);
+        break;
+      }
       case 'LOG_REQUEST_COMMITS': {
         const maxCommits = vscode.workspace.getConfiguration('gitsuite').get<number>('graphMaxCommits', 1000);
         const limit = Math.min(msg.limit, maxCommits);
