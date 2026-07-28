@@ -2,7 +2,7 @@
   "name": "git-suite",
   "displayName": "Git Suite — Like IDEA",
   "description": "JetBrains-like Git management for VS Code — Commit panel, Git Log with graph, multi-repo support and more.",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "publisher": "pujie",
   "license": "GPL-3.0-only",
   "repository": {
