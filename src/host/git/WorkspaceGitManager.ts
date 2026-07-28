@@ -720,10 +720,16 @@ export class WorkspaceGitManager implements vscode.Disposable {
     };
   }
 
-  async getAllBranches(): Promise<BranchInfo[]> {
+  async getAllBranches(repoIds?: string[]): Promise<BranchInfo[]> {
+    // When repoIds is given, only scan those repos (e.g. switching the log filter to one repo).
+    // Otherwise scan all repos. The worktree→main duplication below always runs over full repoMetas
+    // so HEAD mapping stays correct regardless of which subset was scanned.
+    const targetRepos = repoIds && repoIds.length > 0
+      ? repoIds.map(id => this.repos.get(id)).filter((r): r is GitService => !!r)
+      : Array.from(this.repos.values());
     const [allBranches, currentBranches] = await Promise.all([
-      Promise.allSettled(Array.from(this.repos.values()).map(r => r.getBranches())),
-      Promise.allSettled(Array.from(this.repos.values()).map(r => r.getCurrentBranch())),
+      Promise.allSettled(targetRepos.map(r => r.getBranches())),
+      Promise.allSettled(targetRepos.map(r => r.getCurrentBranch())),
     ]);
 
     const branches = allBranches

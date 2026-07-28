@@ -72,16 +72,39 @@ function loadImagePixels(url: string, sampleSize = 8): Promise<boolean> {
   });
 }
 
+// Process-level avatar cache shared by every AuthorAvatar instance.
+// Without this, a commit list with N rows by the same author fires N identical gravatar
+// requests, each 404 logging to the console. Cap probing per email so the noise is bounded
+// to at most MAX_ATTEMPTS on startup, then the email is treated as "no avatar" forever.
+const MAX_ATTEMPTS = 3;
+interface AvatarCacheEntry { url: string | null; attempts: number; resolved: boolean; }
+const avatarCache = new Map<string, AvatarCacheEntry>();
+
 async function resolveAvatarUrl(email: string, size: number): Promise<string | null> {
-  const github = githubAvatarUrl(email, size);
-  if (github) {
-    const blank = await loadImagePixels(github);
-    return blank ? null : github;
+  const cached = avatarCache.get(email);
+  if (cached) {
+    // Already resolved (success or gave up) — return without another request.
+    if (cached.resolved) return cached.url;
+    // Probing budget exhausted — stop firing 404s.
+    if (cached.attempts >= MAX_ATTEMPTS) { cached.resolved = true; return null; }
   }
 
-  const gravatar = await gravatarUrl(email, size);
-  const blank = await loadImagePixels(gravatar);
-  return blank ? null : gravatar;
+  const github = githubAvatarUrl(email, size);
+  const url = github ?? (await gravatarUrl(email, size));
+  const blank = await loadImagePixels(url);
+
+  const resolved = !blank;
+  if (resolved) {
+    avatarCache.set(email, { url, attempts: MAX_ATTEMPTS, resolved: true });
+    return url;
+  }
+
+  // Probe failed (404 / blank). Record the attempt; only keep probing up to MAX_ATTEMPTS.
+  const entry = cached ?? { url: null, attempts: 0, resolved: false };
+  entry.attempts++;
+  if (entry.attempts >= MAX_ATTEMPTS) entry.resolved = true;
+  avatarCache.set(email, entry);
+  return null;
 }
 
 export function AuthorAvatar({ authorName, authorEmail, size = 20, isYou = false }: Props) {

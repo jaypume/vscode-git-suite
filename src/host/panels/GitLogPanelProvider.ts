@@ -4,7 +4,7 @@ import { getWebviewHtml } from '../utils/webviewHtml';
 import { WorkspaceGitManager } from '../git/WorkspaceGitManager';
 import type { LogToHostMsg, HostToLogMsg } from '../types/messages';
 import type { BranchInfo } from '../types/git';
-import { loadIconTheme } from '../utils/IconThemeService';
+import { loadIconTheme, invalidateIconThemeCache } from '../utils/IconThemeService';
 import type { CommitPanelProvider } from './CommitPanelProvider';
 import type { UndockedPanelProvider } from './UndockedPanelProvider';
 import { openSquashEditor } from './SquashEditorPanel';
@@ -126,6 +126,27 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     });
   }
 
+  /**
+   * Debounced refresh after branch/repo changes. Sends LOG_INIT_DATA to push fresh branches —
+   * NOT LOG_REFRESH. LOG_REFRESH makes the webview re-request all commits and recompute the
+   * graph, which is wrong here: a branch/ref change doesn't alter commit content, only branch
+   * metadata, so setBranches alone is enough. (At startup onBranchChange fires several times
+   * as fetches settle; using LOG_REFRESH there caused redundant full commit reloads.)
+   *
+   * The 800ms window coalesces the startup burst — onBranchChange fires as each repo's fetch
+   * completes, with intervals long enough that a short debounce still emitted several
+   * LOG_INIT_DATA messages.
+   */
+  private scheduleBranchesRefresh(): void {
+    if (this.refreshDebounce) clearTimeout(this.refreshDebounce);
+    this.refreshDebounce = setTimeout(async () => {
+      this.refreshDebounce = null;
+      const repos = this.getVisibleRepos();
+      const branches = await this.getFilteredBranches();
+      this.broadcast({ type: 'LOG_INIT_DATA', repos, branches });
+    }, 800);
+  }
+
   constructor(
     private readonly extensionUri: vscode.Uri,
     private readonly manager: WorkspaceGitManager
@@ -133,21 +154,12 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     // Register manager listeners here so they fire even when the panel has never been opened.
     // this.post() silently drops messages when the webview is not yet resolved — that's fine,
     // because resolveWebviewView performs an explicit initial sync when the panel first opens.
+    // onBranchChange/onReposChange fire in a burst at startup as fetches settle; scheduleBranchesRefresh
+    // debounces them (800ms) into a single LOG_INIT_DATA so the webview doesn't flicker through
+    // several re-renders.
     this.managerListeners.push(
-      this.manager.onBranchChange(async () => {
-        const repos = this.getVisibleRepos();
-        const branches = await this.getFilteredBranches();
-        this.broadcast({ type: 'LOG_INIT_DATA', repos, branches });
-        if (this.refreshDebounce) clearTimeout(this.refreshDebounce);
-        this.refreshDebounce = setTimeout(() => this.broadcast({ type: 'LOG_REFRESH' }), 300);
-      }),
-      this.manager.onReposChange(async () => {
-        const repos = this.getVisibleRepos();
-        const branches = await this.getFilteredBranches();
-        this.broadcast({ type: 'LOG_INIT_DATA', repos, branches });
-        if (this.refreshDebounce) clearTimeout(this.refreshDebounce);
-        this.refreshDebounce = setTimeout(() => this.broadcast({ type: 'LOG_REFRESH' }), 300);
-      })
+      this.manager.onBranchChange(() => this.scheduleBranchesRefresh()),
+      this.manager.onReposChange(() => this.scheduleBranchesRefresh())
     );
   }
 
@@ -179,6 +191,7 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     this.disposables.push(
       vscode.workspace.onDidChangeConfiguration(e => {
         if (e.affectsConfiguration('workbench.iconTheme') || e.affectsConfiguration('workbench.colorTheme')) {
+          invalidateIconThemeCache();
           if (this.view) {
             Promise.all([loadIconTheme(this.view.webview), this.getFilteredBranches()]).then(([iconTheme, branches]) => {
               this.post({ type: 'LOG_INIT_DATA', repos: this.getVisibleRepos(), branches, iconTheme });
@@ -309,9 +322,12 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
     return this.getNonWorktreeRepos().filter(m => !this.hiddenRepoIds.includes(m.id));
   }
 
-  private async getFilteredBranches() {
+  private async getFilteredBranches(repoIds?: string[]) {
+    // Only scan non-worktree repos (worktree branches are duplicated under their main repo
+    // by getAllBranches). When repoIds is given, restrict the git scan to that subset.
     const ids = new Set(this.getNonWorktreeRepos().map(r => r.id));
-    const all = await this.manager.getAllBranches();
+    const scanIds = repoIds && repoIds.length > 0 ? repoIds : undefined;
+    const all = await this.manager.getAllBranches(scanIds);
     return all.filter(b => ids.has(b.repoId));
   }
 
@@ -321,25 +337,14 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         const maxCommits = vscode.workspace.getConfiguration('gitsuite').get<number>('graphMaxCommits', 1000);
         const limit = Math.min(msg.limit, maxCommits);
 
-        const repos = this.getVisibleRepos();
-        const [branches, iconTheme] = await Promise.all([
-          this.getFilteredBranches(),
-          this.view ? loadIconTheme(this.view.webview) : Promise.resolve(undefined),
-        ]);
-        this.post({ type: 'LOG_INIT_DATA', repos, branches, iconTheme });
-
-        // Send tags for all repos
-        for (const meta of repos) {
-          const repo = this.manager.getRepo(meta.id);
-          if (!repo) continue;
-          repo.getTags().then(rawTags => {
-            this.post({ type: 'LOG_TAGS_UPDATE', repoId: meta.id, tags: rawTags.map(t => ({ ...t, repoId: meta.id })) });
-          }).catch(() => {});
-        }
-
         const logRepoIds = msg.repoIds.length > 0
           ? msg.repoIds.filter(id => !this.manager.getRepoMetas().find(m => m.id === id)?.isWorktree && !this.hiddenRepoIds.includes(id))
           : this.getVisibleRepos().map(r => r.id);
+
+        // Fetch commits first so the list repaints immediately; branches/tags/icon/stashes
+        // are sent asynchronously and never block the commit batch. Previously these were
+        // awaited before fetching the log, which made every repo switch wait on a full
+        // branch scan + icon-theme reload.
         const commits = await this.manager.getInterleavedLog(logRepoIds, limit, msg.skip, {
           filterText: msg.filterText,
           filterAuthor: msg.filterAuthor,
@@ -349,8 +354,26 @@ export class GitLogPanelProvider implements vscode.WebviewViewProvider, vscode.D
         });
         this.post({ type: 'LOG_COMMITS_BATCH', commits, isLast: commits.length < limit, batchIndex: 0, requestId: msg.requestId });
 
-        // Send stashes only on first load (not on pagination)
+        // On first load (not pagination) refresh the repo-scoped metadata in parallel.
+        // Never block the commit batch above on these. Branches are scanned only for the
+        // target repos (not all visible repos) to cut git subprocess count on repo switch.
         if (msg.skip === 0) {
+          const repos = this.getVisibleRepos();
+          Promise.all([
+            this.getFilteredBranches(logRepoIds),
+            this.view ? loadIconTheme(this.view.webview) : Promise.resolve(undefined),
+          ]).then(([branches, iconTheme]) => {
+            this.post({ type: 'LOG_INIT_DATA', repos, branches, iconTheme });
+          }).catch(() => {});
+          // Tags: only for the repos whose commits we just fetched.
+          for (const repoId of logRepoIds) {
+            const repo = this.manager.getRepo(repoId);
+            if (!repo) continue;
+            repo.getTags().then(rawTags => {
+              this.post({ type: 'LOG_TAGS_UPDATE', repoId, tags: rawTags.map(t => ({ ...t, repoId })) });
+            }).catch(() => {});
+          }
+          // Stashes for the fetched repos.
           Promise.all(logRepoIds.map(async (repoId) => {
             const repo = this.manager.getRepo(repoId);
             if (!repo) return [];

@@ -107,6 +107,62 @@ export function getRowLines(row: number, segments: Segment[]): RowLine[] {
 
 // ─── Internal GVertex / GBranch ──────────────────────────────────────────────
 
+/**
+ * Stable topological sort: child before parent, preserving original order otherwise.
+ * DFS post-order naturally yields child-before-parent (children complete before their
+ * parent node finishes), so no reversal is needed. Cycles (shouldn't happen in a git DAG,
+ * but defends against malformed input) are broken by the visited-state guard.
+ *
+ * Why this exists: assignLanes/determinePath assume parents sit at a higher index than
+ * their children and scan forward to find them. The host's getInterleavedLog sorts by
+ * committerDate for multi-repo interleaving, which can place a parent ABOVE its child —
+ * the forward scan then never reaches the parent and the outer while-loop spins forever
+ * (this deadlocked the webview on repos like libra-core). topoSort restores the invariant.
+ */
+function topoSort(commits: CommitNode[]): CommitNode[] {
+  const n = commits.length;
+  const indexByHash = new Map<string, number>();
+  for (let i = 0; i < n; i++) indexByHash.set(commits[i].hash, i);
+
+  // childrenOf[i] = indices of commits whose parents include commits[i]
+  const childrenOf: number[][] = Array.from({ length: n }, () => []);
+  for (let i = 0; i < n; i++) {
+    for (const p of commits[i].parents) {
+      const pi = indexByHash.get(p);
+      if (pi !== undefined && pi !== i) childrenOf[pi].push(i);
+    }
+  }
+
+  const order: number[] = [];
+  const state = new Uint8Array(n); // 0=unvisited, 1=in-progress, 2=done
+  const stack: Array<{ node: number; childIter: number }> = [];
+  for (let start = 0; start < n; start++) {
+    if (state[start]) continue;
+    stack.push({ node: start, childIter: 0 });
+    state[start] = 1;
+    while (stack.length) {
+      const top = stack[stack.length - 1];
+      if (top.childIter < childrenOf[top.node].length) {
+        const child = childrenOf[top.node][top.childIter++];
+        if (state[child] === 0) {
+          state[child] = 1;
+          stack.push({ node: child, childIter: 0 });
+        }
+        // if state===1 (back edge / cycle) or 2 (already emitted), skip
+      } else {
+        state[top.node] = 2;
+        order.push(top.node);
+        stack.pop();
+      }
+    }
+  }
+  // Post-order already yields child-before-parent (children pushed to order before the
+  // parent node completes). No reversal needed — determinePath requires parents at a
+  // higher index than children, which is exactly this order.
+  const result = order.map(i => commits[i]);
+  return result.length === n ? result : commits; // safety: fall back if something went wrong
+}
+
 const NULL_ID = -1;
 
 class GVertex {
@@ -196,6 +252,13 @@ export function assignLanes(commits: CommitNode[], isFiltered = false): GraphLay
   const visibleHashes = new Set(commits.map(c => c.hash));
   commits = commits.map(c => ({ ...c, parents: c.parents.filter(p => visibleHashes.has(p)) }));
 
+  // Reorder into topological order (child before parent). The lane-assignment algorithm
+  // assumes parents appear at a higher index than their children, but the host may deliver
+  // commits sorted by committerDate (multi-repo interleaving) which violates this — a parent
+  // landing above its child makes determinePath's forward scan miss it and loop forever.
+  // Stable sort keeps the original relative order of unrelated commits.
+  commits = topoSort(commits);
+
   const n = commits.length;
   const hashIndex = new Map<string, number>();
   for (let i = 0; i < n; i++) hashIndex.set(commits[i].hash, i);
@@ -284,7 +347,16 @@ export function assignLanes(commits: CommitNode[], isFiltered = false): GraphLay
   }
 
   let j = 0;
+  // Safety guard: determinePath(j) must change vertex state so the loop advances. The topo
+  // sort above restores the parent-after-child invariant so this should always converge;
+  // the cap is a last-resort defense against malformed input.
+  const ITER_CAP = Math.max(1000, vertices.length * 50);
+  let iter = 0;
   while (j < vertices.length) {
+    if (++iter > ITER_CAP) {
+      console.warn('[graphLayout] lane-assignment iteration cap hit — graph may be incomplete');
+      break;
+    }
     if (vertices[j].getNextParent() !== null || vertices[j].isNotOnBranch()) {
       determinePath(j);
     } else {

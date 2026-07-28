@@ -10,7 +10,7 @@ import type { CommitToHostMsg, HostToCommitMsg } from '../types/messages';
 import type { WorkspaceStatus } from '../types/git';
 import { CHANGELIST_UNVERSIONED_ID } from '../types/git';
 import { parseConflictFile } from '../git/ConflictParser';
-import { loadIconTheme } from '../utils/IconThemeService';
+import { loadIconTheme, invalidateIconThemeCache } from '../utils/IconThemeService';
 import type { MergeEditorProvider } from './MergeEditorProvider';
 import type { GitLogPanelProvider } from './GitLogPanelProvider';
 import type { UndockedPanelProvider } from './UndockedPanelProvider';
@@ -191,6 +191,7 @@ export class CommitPanelProvider implements vscode.WebviewViewProvider {
     // Re-send icon theme when the user changes icon or color theme
     const configWatcher = vscode.workspace.onDidChangeConfiguration(e => {
       if (e.affectsConfiguration('workbench.iconTheme') || e.affectsConfiguration('workbench.colorTheme')) {
+        invalidateIconThemeCache();
         if (this.view) {
           loadIconTheme(this.view.webview).then(iconTheme => {
             this.manager.getAllStatuses().then(status => {

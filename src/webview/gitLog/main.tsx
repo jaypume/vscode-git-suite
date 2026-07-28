@@ -61,6 +61,10 @@ function App() {
 
       switch (msg.type) {
         case 'LOG_INIT_DATA':
+          // setRepos/setBranches unconditionally overwrite (not merge), while iconTheme is
+          // conditional. So the host MUST send repos+branches+iconTheme in ONE message —
+          // splitting them (e.g. {repos,branches} then {iconTheme}) would set repos/branches
+          // to undefined on the second message. undockedPanel/main.tsx mirrors this exactly.
           store.setRepos(msg.repos, msg.hasWorkspaceFolder, msg.aiEnabled);
           store.setBranches(msg.branches);
           if (msg.iconTheme) store.setIconTheme(msg.iconTheme);
@@ -216,6 +220,9 @@ function App() {
     if (layoutRafRef.current !== null) cancelAnimationFrame(layoutRafRef.current);
     layoutRafRef.current = requestAnimationFrame(() => {
       layoutRafRef.current = null;
+      // Skip the recalc when there are no commits yet — the empty graph is meaningless and
+      // this avoids one wasted pass during startup (before the first commit batch arrives).
+      if (pendingCommitsRef.current.length === 0) return;
       setGraphLayout(assignLanes(pendingCommitsRef.current, pendingFilteredRef.current));
     });
     return () => { if (layoutRafRef.current !== null) cancelAnimationFrame(layoutRafRef.current); };

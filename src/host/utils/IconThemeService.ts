@@ -24,6 +24,20 @@ export interface IconThemeData {
   colorMap?: Record<string, string>;  // icon name → color
 }
 
+// Per-webview icon-theme cache. WeakMap so entries are reclaimed when the webview is
+// disposed (the cached webview URIs are only valid for that webview instance).
+const iconThemeCache = new WeakMap<vscode.Webview, Map<string, IconThemeData>>();
+
+/** Drop all cached icon-theme data (call on workbench.iconTheme / colorTheme change). */
+export function invalidateIconThemeCache(): void {
+  // WeakMap has no clear(); replacing the inner maps lets the old ones GC with the webview.
+  // We can't enumerate WeakMap keys, so each webview's inner map is reset lazily on next load
+  // via the cacheKey miss below — but to force freshness on theme change we track a version.
+  iconThemeVersion++;
+}
+
+let iconThemeVersion = 0;
+
 interface IconDefinitionSvg { iconPath: string }
 interface IconDefinitionFont { fontCharacter: string; fontColor?: string; fontSize?: string }
 type IconDef = IconDefinitionSvg | IconDefinitionFont;
@@ -177,6 +191,20 @@ export async function loadIconTheme(webview: vscode.Webview): Promise<IconThemeD
     const themeId = vscode.workspace.getConfiguration('workbench').get<string>('iconTheme');
     if (!themeId) return { type: 'none' };
 
+    const isDark = vscode.window.activeColorTheme.kind !== vscode.ColorThemeKind.Light;
+    // Per-webview cache: reading + normalizing a theme JSONC (Material Icon Theme has
+    // thousands of icon defs, each resolved through fs.existsSync + asWebviewUri) is the
+    // single most expensive sync step on repo switch. Keyed by themeId + isDark so a
+    // theme/color change invalidates only the affected variant.
+    let inner = iconThemeCache.get(webview);
+    if (!inner) {
+      inner = new Map();
+      iconThemeCache.set(webview, inner);
+    }
+    const cacheKey = `${themeId}|${isDark ? 'dark' : 'light'}|v${iconThemeVersion}`;
+    const cached = inner.get(cacheKey);
+    if (cached) return cached;
+
     const themeExt = vscode.extensions.all.find(ext => {
       const themes: Array<{ id: string; path: string }> = ext.packageJSON?.contributes?.iconThemes ?? [];
       return themes.some(t => t.id === themeId);
@@ -198,7 +226,6 @@ export async function loadIconTheme(webview: vscode.Webview): Promise<IconThemeD
     const firstDef = Object.values(iconDefinitions)[0];
     if (!firstDef) return { type: 'none' };
 
-    const isDark = vscode.window.activeColorTheme.kind !== vscode.ColorThemeKind.Light;
     const variant = isDark ? json : mergeVariant(json, json.light ?? {});
 
     if (isSvg(firstDef)) {
@@ -218,7 +245,7 @@ export async function loadIconTheme(webview: vscode.Webview): Promise<IconThemeD
         }
       }
 
-      return {
+      const result: IconThemeData = {
         type: 'svg',
         extensionUri,
         svgMap,
@@ -231,6 +258,8 @@ export async function loadIconTheme(webview: vscode.Webview): Promise<IconThemeD
         folder: variant.folder ?? json.folder,
         folderExpanded: variant.folderExpanded ?? json.folderExpanded,
       };
+      inner.set(cacheKey, result);
+      return result;
     } else {
       // Font-based theme (Seti, etc.)
       const fonts: Array<{ id: string; src: Array<{ path: string; format: string }> }> = json.fonts ?? [];
@@ -252,7 +281,7 @@ export async function loadIconTheme(webview: vscode.Webview): Promise<IconThemeD
         if (fc.fontColor) colorMap[name] = fc.fontColor;
       }
 
-      return {
+      const result: IconThemeData = {
         type: 'font',
         extensionUri,
         fontFaceUri: fontUri,
@@ -269,6 +298,8 @@ export async function loadIconTheme(webview: vscode.Webview): Promise<IconThemeD
         folder: variant.folder ?? json.folder,
         folderExpanded: variant.folderExpanded ?? json.folderExpanded,
       };
+      inner.set(cacheKey, result);
+      return result;
     }
   } catch {
     return { type: 'none' };
